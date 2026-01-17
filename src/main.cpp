@@ -11,6 +11,7 @@
 #include "../include/shader.hpp"
 #include "../include/camera.hpp"
 #include "../include/ball.hpp"
+#include "../include/crosshair.hpp"
 
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 600;
@@ -63,7 +64,8 @@ int main()
     glViewport(0, 0, 800, 600);
 
     Shader shaderBall("src/shaders/ballShader.vs", "src/shaders/ballShader.fs");
-    Ball ball(12, 12);
+    Ball ball;
+    Crosshair crosshair;
 
     glm::mat4 model;
     glm::mat4 view;
@@ -91,6 +93,7 @@ int main()
         shaderBall.setMat4("projection", projection);
 
         ball.draw();
+        crosshair.draw(static_cast<float>(WIDTH), static_cast<float>(HEIGHT));
         
         glfwSwapBuffers(window);
         glfwPollEvents();

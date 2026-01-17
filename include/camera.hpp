@@ -14,11 +14,10 @@ class Camera
 public:
     Camera(glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f),
         glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f),
-        glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f),
-        GLFWwindow * window = NULL);
+        glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f));
 
     void updatePos(GLFWwindow * window, float camSpeed);
-    void updateDir(GLFWwindow * window, double xpos, double ypos);
+    void updateDir(GLFWwindow * window, double xposIn, double yposIn);
     void updateZoom(double yoffset);
 
     glm::mat4 getViewMat();
@@ -28,8 +27,7 @@ public:
     float zoom;
 
     float lastX, lastY;
-
-    bool firstMouseMovement;
+    bool firstMouse;
 
     glm::vec3 Pos;
     glm::vec3 Front;
@@ -41,9 +39,9 @@ private:
     float velocity;
 };
 
-Camera::Camera(glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, GLFWwindow * window)
+Camera::Camera(glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp)
 {
-    this->yaw = 0.0f, this->pitch = 0.0f;
+    this->yaw = -90.0f, this->pitch = 0.0f;
 
     this->zoom = 45.0f;
 
@@ -51,23 +49,14 @@ Camera::Camera(glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp, G
     this->Front = cameraFront;
     this->Up = cameraUp;
 
-    this->sensitivity = 0.1f;
+    this->sensitivity = 0.3f;
     this->velocity = 2.5f;
-    this->firstMouseMovement = true;
 
-    if(window)
-    {
-        int width, height;
-        glfwGetWindowSize(window, &width, &height);
-        this->lastX = static_cast<float>(width) / 2.0f;
-        this->lastY = static_cast<float>(height) / 2.0f;
-    }
-    else
-    {
-        this->lastX = 0.0;
-        this->lastY = 0.0;
-    }
+    this->lastX = 400.0f;
+    this->lastY = 300.0f;
+    this->firstMouse = true;
 }
+
 
 void Camera::updatePos(GLFWwindow * window, float deltaTime)
 {
@@ -87,11 +76,16 @@ void Camera::updatePos(GLFWwindow * window, float deltaTime)
     }
 }
 
-void Camera::updateDir(GLFWwindow * window, double xpos, double ypos)
+void Camera::updateDir(GLFWwindow * window, double xposIn, double yposIn)
 {
-    if(firstMouseMovement){
-        this->lastX = xpos, this->lastY = ypos;
-        firstMouseMovement = false;
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+
+    if (firstMouse)
+    {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
     }
 
     float xoffset = xpos - lastX;

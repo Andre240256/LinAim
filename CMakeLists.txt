@@ -27,3 +27,5 @@ target_link_libraries(LinAim
     ${GLM_LIBRARIES} 
     dl
 )
+
+file(COPY ${CMAKE_SOURCE_DIR}/src/shaders DESTINATION ${CMAKE_BINARY_DIR})

@@ -16,14 +16,19 @@ class Shader
 public:
     unsigned int ID;
 
-    Shader(const std::string& vertexPath, const std::string& fragmentShader);
+    Shader(const std::string& vertexPath, const std::string& fragmentPath);
 
     void use();
+
+    //setters
+    void setMat4(const std::string& name,const glm::mat4& mat) const;
+    void setFloat(const std::string& name, float val) const;
+    void setInt(const std::string& name, int val) const;
 private:
 };
 
 //constructor
-Shader::Shader(const std::string& vertexPath, const std::string& fragmentShader)
+Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
 {
     std::string vertexCode;
     std::ifstream vShaderFile;
@@ -35,7 +40,7 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentShader)
     
     try{
         vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentCode);
+        fShaderFile.open(fragmentPath);
 
         std::stringstream vShaderStream, fShaderStream;
 
@@ -99,4 +104,20 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentShader)
 void Shader::use()
 {
     glUseProgram(this->ID);
+}
+
+//setters
+void Shader::setMat4(const std::string& name, const glm::mat4& mat) const
+{
+    glUniformMatrix4fv(glGetUniformLocation(this->ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void Shader::setFloat(const std::string& name, float val) const
+{
+    glUniform1f(glGetUniformLocation(this->ID, name.c_str()), val);
+}
+
+void  Shader::setInt(const std::string& name, int val) const
+{
+    glUniform1i(glGetUniformLocation(this->ID, name.c_str()), val);
 }

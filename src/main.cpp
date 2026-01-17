@@ -10,11 +10,12 @@
 
 #include "../include/shader.hpp"
 #include "../include/camera.hpp"
+#include "../include/player.hpp"
 #include "../include/ball.hpp"
 #include "../include/crosshair.hpp"
 
-const unsigned int WIDTH = 800;
-const unsigned int HEIGHT = 600;
+const unsigned int WIDTH = 1280;
+const unsigned int HEIGHT = 720;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int size);
 void mouse_callback(GLFWwindow * window, double xpos, double ypos);
@@ -22,7 +23,7 @@ void scroll_callback(GLFWwindow * window, double xoffset, double yoffset);
 
 void processInput(GLFWwindow * window, float deltaTime);
 
-Camera camera;
+Player player;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -61,7 +62,7 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
     // glEnable(GL_CULL_FACE);
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, WIDTH, HEIGHT);
 
     Shader shaderBall("src/shaders/ballShader.vs", "src/shaders/ballShader.fs");
     Ball ball;
@@ -84,8 +85,8 @@ int main()
 
         float aspectio = static_cast<float>(WIDTH) / static_cast<float>(HEIGHT);
         ball.getModelMatrix(model, glm::vec3(0.0f), 1.0f);
-        view = camera.getViewMat();
-        projection = glm::perspective(glm::radians(camera.zoom), aspectio, 0.1f, 100.0f);
+        view = player.getViewMat();
+        projection = glm::perspective(glm::radians(player.zoom), aspectio, 0.1f, 100.0f);
         
         shaderBall.use();
         shaderBall.setMat4("model", model);
@@ -112,15 +113,15 @@ void processInput(GLFWwindow * window, float deltaTime)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    camera.updatePos(window, deltaTime);
+    player.updatePos(window, deltaTime);
 }
 
 void mouse_callback(GLFWwindow * window, double xposIn, double yposIn)
 {
-    camera.updateDir(window, xposIn, yposIn);
+    player.updateDir(window, xposIn, yposIn);
 }
 
 void scroll_callback(GLFWwindow * window, double xoffset, double yoffset)
 {
-    camera.updateZoom(yoffset);
+    player.updateZoom(yoffset);
 }

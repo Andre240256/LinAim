@@ -16,7 +16,7 @@ public:
         glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f),
         glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f));
 
-    void updatePos(GLFWwindow * window, float camSpeed);
+    virtual void updatePos(GLFWwindow * window, float camSpeed);
     void updateDir(GLFWwindow * window, double xposIn, double yposIn);
     void updateZoom(double yoffset);
 
@@ -29,14 +29,15 @@ public:
     float lastX, lastY;
     bool firstMouse;
 
+protected:
+
     glm::vec3 Pos;
     glm::vec3 Front;
     glm::vec3 Up;
 
-private:
-    
     float sensitivity;
     float velocity;
+private:
 };
 
 Camera::Camera(glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp)
@@ -73,6 +74,12 @@ void Camera::updatePos(GLFWwindow * window, float deltaTime)
     }
     if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
         this->Pos -= distance * glm::normalize(glm::cross(this->Front, this->Up));
+    }
+    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS){
+        this->Pos += distance * this->Up;
+    }
+    if(glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS){
+        this->Pos -= distance * this->Up;
     }
 }
 

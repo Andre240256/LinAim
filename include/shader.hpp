@@ -22,6 +22,7 @@ public:
 
     //setters
     void setMat4(const std::string& name,const glm::mat4& mat) const;
+    void setVec3(const std::string& name, const glm::vec3& vec) const;
     void setFloat(const std::string& name, float val) const;
     void setInt(const std::string& name, int val) const;
 private:
@@ -110,6 +111,11 @@ void Shader::use()
 void Shader::setMat4(const std::string& name, const glm::mat4& mat) const
 {
     glUniformMatrix4fv(glGetUniformLocation(this->ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+void Shader::setVec3(const std::string& name, const glm::vec3& vec) const
+{
+    glUniform3fv(glGetUniformLocation(this->ID, name.c_str()), 1, glm::value_ptr(vec));
 }
 
 void Shader::setFloat(const std::string& name, float val) const

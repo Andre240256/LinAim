@@ -23,12 +23,15 @@ public:
 
     void draw() const;
     void bindUniformBlock(int gateWay, const std::string& name) const;
-    
-private:
-    unsigned int VBO, EBO;
+
+protected:
+    glm::vec3 ballColor;
     Shader shader;
     
     glm::mat4 getModelMatrix() const;
+private:
+    unsigned int VBO, EBO;
+    
     void setupBall(int xSegments, int ySegments);
 };
 
@@ -36,6 +39,7 @@ Ball::Ball(glm::vec3 startPos, int xSegments, int ySegments) : shader("src/shade
 {
     this->pos = startPos;
     this->scale = glm::vec3(1.0f);
+    this->ballColor = glm::vec3(0.1843, 0.1843, 0.9255);
     setupBall(xSegments, ySegments);
 }
 
@@ -43,6 +47,8 @@ void Ball::draw() const
 {
     shader.use();
     shader.setMat4("model", getModelMatrix());
+    shader.setVec3("ballColor", ballColor);
+
 
     glBindVertexArray(this->VAO);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);

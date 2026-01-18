@@ -29,11 +29,11 @@ public:
     float lastX, lastY;
     bool firstMouse;
 
-protected:
-
     glm::vec3 Pos;
     glm::vec3 Front;
     glm::vec3 Up;
+
+protected:
 
     float sensitivity;
     float velocity;
@@ -53,8 +53,8 @@ Camera::Camera(glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp)
     this->sensitivity = 0.3f;
     this->velocity = 2.5f;
 
-    this->lastX = 400.0f;
-    this->lastY = 300.0f;
+    this->lastX = 640.0f;
+    this->lastY = 360.0f;
     this->firstMouse = true;
 }
 

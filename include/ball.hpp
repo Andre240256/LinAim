@@ -18,23 +18,29 @@ public:
     
     Ball(int xSegments = 30, int ySegments = 30);
 
-    void draw();
+    void draw(const glm::mat4& model = glm::mat4(1.0f)) const;
     void getModelMatrix(glm::mat4& model, const glm::vec3 center, float radius);
+
+    void bindUniformBlock(int gateWay, const std::string& name) const;
 
 private:
     unsigned int VBO, EBO;
+    Shader shader;
 
     void setupBall(int xSegments, int ySegments);
 };
 
-Ball::Ball(int xSegments, int ySegments)
+Ball::Ball(int xSegments, int ySegments) : shader("src/shaders/ballShader.vs", "src/shaders/ballShader.fs")
 {
     setupBall(xSegments, ySegments);
 }
 
-void Ball::draw()
+void Ball::draw(const glm::mat4& model) const
 {
-    glBindVertexArray(VAO);
+    shader.use();
+    shader.setMat4("model", model);
+
+    glBindVertexArray(this->VAO);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
@@ -95,4 +101,9 @@ void Ball::setupBall(int xSegments, int ySegments)
     glEnableVertexAttribArray(0);
 
     glBindVertexArray(0);
+}
+
+void Ball::bindUniformBlock(int gateway, const std::string& name) const
+{
+    glUniformBlockBinding(this->shader.ID, shader.getUniformBlockID(name), gateway);
 }

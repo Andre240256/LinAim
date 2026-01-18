@@ -18,13 +18,15 @@ public:
 
     Shader(const std::string& vertexPath, const std::string& fragmentPath);
 
-    void use();
+    void use() const;
 
     //setters
     void setMat4(const std::string& name,const glm::mat4& mat) const;
     void setVec3(const std::string& name, const glm::vec3& vec) const;
     void setFloat(const std::string& name, float val) const;
     void setInt(const std::string& name, int val) const;
+
+    unsigned int getUniformBlockID(const std::string& name) const;
 private:
 };
 
@@ -57,7 +59,8 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
 
     catch(std::ifstream::failure e)
     {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ"
+        << std::endl << vertexPath << std::endl << fragmentPath << std::endl;
     }
 
     const char * vShaderCode = vertexCode.c_str();
@@ -102,7 +105,7 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
     glDeleteShader(fragment);
 }
 
-void Shader::use()
+void Shader::use() const
 {
     glUseProgram(this->ID);
 }
@@ -126,4 +129,11 @@ void Shader::setFloat(const std::string& name, float val) const
 void  Shader::setInt(const std::string& name, int val) const
 {
     glUniform1i(glGetUniformLocation(this->ID, name.c_str()), val);
+}
+
+//getters
+
+unsigned int Shader::getUniformBlockID(const std::string& name) const
+{
+    return glGetUniformBlockIndex(this->ID, name.c_str());
 }

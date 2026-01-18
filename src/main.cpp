@@ -26,7 +26,7 @@ void processInput(GLFWwindow * window, float deltaTime);
 
 unsigned int loadUBO();
 
-Player player(glm::vec3(0.0f, 1.5f, 3.0f));
+Player player(glm::vec3(0.0f, 1.5f, 10.0f));
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -70,7 +70,7 @@ int main()
     unsigned int matricesUBO = loadUBO();
     
     Grid grid;
-    Ball ball;
+    Ball ball(glm::vec3(0.0f, 3.0f, 0.0f));
     Crosshair crosshair;
 
     ball.bindUniformBlock(0, "Matrices");
@@ -92,7 +92,6 @@ int main()
         processInput(window, deltaTime);
 
         float aspectio = static_cast<float>(WIDTH) / static_cast<float>(HEIGHT);
-        ball.getModelMatrix(model, glm::vec3(0.0f, 3.0f, 0.0f), 1.0f);
 
         view = player.getViewMat();
         projection = glm::perspective(glm::radians(player.zoom), aspectio, 0.1f, 100.0f);
@@ -101,8 +100,30 @@ int main()
         glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projection));
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        ball.draw(model);
-        grid.draw(glm::mat4(1.0));
+        ball.draw();
+        //floor
+        grid.draw();
+
+        //walls
+        float desloc = grid.gridSize / 2.0f;
+        grid.rotation = glm::vec3(90.0f, 0.0f, 0.0f);
+        grid.pos = glm::vec3(0.0f, desloc, desloc);
+        grid.draw();
+        grid.pos = glm::vec3(0.0f, desloc, - desloc);
+        grid.draw();
+
+        grid.rotation = glm::vec3(0.0f, 0.0f, 90.0f);
+        grid.pos = glm::vec3(desloc, desloc, 0.0f);
+        grid.draw();
+        grid.pos = glm::vec3(- desloc, desloc, 0.0f);
+        grid.draw();
+
+        //roof
+        grid.rotation = glm::vec3(0.0f);
+        grid.pos = glm::vec3(0.0f, 2 * desloc, 0.0f);
+        grid.draw();
+
+        grid.pos = glm::vec3(0.0f);
         crosshair.draw(static_cast<float>(WIDTH), static_cast<float>(HEIGHT));
         
         glfwSwapBuffers(window);

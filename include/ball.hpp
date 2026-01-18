@@ -13,43 +13,50 @@ class Shader;
 class Ball
 {
 public:
+    glm::vec3 pos;
+    glm::vec3 scale;
+
     unsigned int VAO;
     unsigned int indexCount;
     
-    Ball(int xSegments = 30, int ySegments = 30);
+    Ball(glm::vec3 startPos = glm::vec3(0.0f), int xSegments = 30, int ySegments = 30);
 
-    void draw(const glm::mat4& model = glm::mat4(1.0f)) const;
-    void getModelMatrix(glm::mat4& model, const glm::vec3 center, float radius);
-
+    void draw() const;
     void bindUniformBlock(int gateWay, const std::string& name) const;
-
+    
 private:
     unsigned int VBO, EBO;
     Shader shader;
-
+    
+    glm::mat4 getModelMatrix() const;
     void setupBall(int xSegments, int ySegments);
 };
 
-Ball::Ball(int xSegments, int ySegments) : shader("src/shaders/ballShader.vs", "src/shaders/ballShader.fs")
+Ball::Ball(glm::vec3 startPos, int xSegments, int ySegments) : shader("src/shaders/ballShader.vs", "src/shaders/ballShader.fs")
 {
+    this->pos = startPos;
+    this->scale = glm::vec3(1.0f);
     setupBall(xSegments, ySegments);
 }
 
-void Ball::draw(const glm::mat4& model) const
+void Ball::draw() const
 {
     shader.use();
-    shader.setMat4("model", model);
+    shader.setMat4("model", getModelMatrix());
 
     glBindVertexArray(this->VAO);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
 
-void Ball::getModelMatrix(glm::mat4& model, const glm::vec3 center, float radius)
+glm::mat4 Ball::getModelMatrix() const
 {
-    model = glm::mat4(1.0f);
-    model = glm::translate(model, center);
-    model = glm::scale(model, glm::vec3(radius));
+    glm::mat4 model = glm::mat4(1.0f);
+    
+    model = glm::translate(model, this->pos);
+    model = glm::scale(model, this->scale);
+
+    return model;
 }
 
 void Ball::setupBall(int xSegments, int ySegments)

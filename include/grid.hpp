@@ -14,20 +14,31 @@
 
 class Grid{
 public:
-    Grid(int quadSize = 3, int Nquads = 30);
+    glm::vec3 pos;
+    glm::vec3 rotation;
+    glm::vec3 scale;
 
-    void draw(const glm::mat4& model = glm::mat4(1.0f)) const;
+    float gridSize;
+
+    Grid(int quadSize = 2, int Nquads = 20);
+
+    void draw() const;
 
     void bindUniformBlock(int gateway, const std::string& name) const;
 private:
     Shader shader; 
     unsigned int VBO, VAO;
     int vertexCount;
+
+    glm::mat4 getModelMatrix() const;
     void setupGrid(int quadSize, int Nquads);
 };
 
 Grid::Grid(int quadSize, int Nquads): shader("src/shaders/gridShader.vs", "src/shaders/gridShader.fs")
 {
+    this->pos = glm::vec3(0.0f, 0.0f, 0.0f);
+    this->rotation = glm::vec3(0.0f);
+    this->scale = glm::vec3(1.0f);
     setupGrid(quadSize, Nquads);
 }
 
@@ -36,7 +47,7 @@ void Grid::setupGrid(int quadSize, int Nquads)
     std::vector <float> vertices;
 
     float step = static_cast<float> (quadSize);
-    float gridSize = static_cast<float> (quadSize * Nquads);
+    this->gridSize = static_cast<float> (quadSize * Nquads);
     
     for(int i = 0; i <= Nquads; i++){
         float currentPos = - gridSize / 2.0f + i * step;
@@ -75,10 +86,25 @@ void Grid::setupGrid(int quadSize, int Nquads)
     glBindVertexArray(0);
 }
 
-void Grid::draw(const glm::mat4& model) const
+glm::mat4 Grid::getModelMatrix() const
 {
+    glm::mat4 model = glm::mat4(1.0f);
+    
+    model = glm::translate(model, this->pos);
+    
+    model = glm::rotate(model, glm::radians(this->rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(this->rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::rotate(model, glm::radians(this->rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    model = glm::scale(model, this->scale);
+
+    return model;
+}
+
+void Grid::draw() const
+{   
     shader.use();
-    shader.setMat4("model", model);
+    shader.setMat4("model", this->getModelMatrix());
     
     glBindVertexArray(this->VAO);
     glDrawArrays(GL_LINES, 0, vertexCount);

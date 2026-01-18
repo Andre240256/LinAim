@@ -14,6 +14,7 @@
 #include "../include/ball.hpp"
 #include "../include/crosshair.hpp"
 #include "../include/grid.hpp"
+#include "../include/bullet.hpp"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -21,6 +22,7 @@ const unsigned int HEIGHT = 720;
 void framebuffer_size_callback(GLFWwindow * window, int width, int size);
 void mouse_callback(GLFWwindow * window, double xpos, double ypos);
 void scroll_callback(GLFWwindow * window, double xoffset, double yoffset);
+void mouse_button_callback(GLFWwindow * window, int button, int actions, int mods);
 
 void processInput(GLFWwindow * window, float deltaTime);
 
@@ -28,6 +30,7 @@ unsigned int loadUBO();
 
 unsigned int Shader::currentProgramID = 0;
 Player player(glm::vec3(0.0f, 1.5f, 10.0f));
+std::vector<Bullet*> bullets;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -52,9 +55,11 @@ int main()
     }
 
     glfwMakeContextCurrent(window);
+    // glfwSwapInterval(0);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -81,11 +86,16 @@ int main()
     glm::mat4 view;
     glm::mat4 projection;
     
+    int i = 0;
+    bool destroyed = false;
     while(!glfwWindowShouldClose(window))
     {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+        if(i++ % 40 == 0)
+            std::cout << "FPS: " << 1.0/deltaTime << "\n", i = 1;
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -101,30 +111,29 @@ int main()
         glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projection));
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        ball.draw();
-        //floor
-        grid.draw();
+        for(auto it = bullets.begin(); it != bullets.end();){
+            Bullet* b = *it;
 
-        //walls
-        float desloc = grid.gridSize / 2.0f;
-        grid.rotation = glm::vec3(90.0f, 0.0f, 0.0f);
-        grid.pos = glm::vec3(0.0f, desloc, desloc);
-        grid.draw();
-        grid.pos = glm::vec3(0.0f, desloc, - desloc);
-        grid.draw();
+            int command = b->updatePos(window, deltaTime, ball);
+            if(!(b->active)){
+                if(command == COLISION)
+                    destroyed = true;
+                delete b;
+                it = bullets.erase(it);
+            }
+            else{
+                ++it;
+            }
 
-        grid.rotation = glm::vec3(0.0f, 0.0f, 90.0f);
-        grid.pos = glm::vec3(desloc, desloc, 0.0f);
-        grid.draw();
-        grid.pos = glm::vec3(- desloc, desloc, 0.0f);
-        grid.draw();
+        }
+        
+        for(Bullet * b : bullets){
+            b->draw();
+        }
 
-        //roof
-        grid.rotation = glm::vec3(0.0f);
-        grid.pos = glm::vec3(0.0f, 2 * desloc, 0.0f);
-        grid.draw();
-
-        grid.pos = glm::vec3(0.0f);
+        if(!destroyed)
+            ball.draw();
+        grid.drawCell();
         crosshair.draw(static_cast<float>(WIDTH), static_cast<float>(HEIGHT));
         
         glfwSwapBuffers(window);
@@ -135,10 +144,6 @@ int main()
     return 0;
 }
 
-void framebuffer_size_callback(GLFWwindow * window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
 
 void processInput(GLFWwindow * window, float deltaTime)
 {
@@ -162,6 +167,11 @@ unsigned int loadUBO()
     return ubo;
 }
 
+void framebuffer_size_callback(GLFWwindow * window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
 void mouse_callback(GLFWwindow * window, double xposIn, double yposIn)
 {
     player.updateDir(window, xposIn, yposIn);
@@ -170,4 +180,13 @@ void mouse_callback(GLFWwindow * window, double xposIn, double yposIn)
 void scroll_callback(GLFWwindow * window, double xoffset, double yoffset)
 {
     player.updateZoom(yoffset);
+}
+
+void mouse_button_callback(GLFWwindow * window, int button, int action, int mods)
+{
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+       bullets.push_back(new Bullet(player.Pos + player.Front * 0.5f, player.Front));
+       bullets[bullets.size() - 1]->bindUniformBlock(0, "Matrices"); 
+    }
 }

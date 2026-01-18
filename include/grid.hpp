@@ -23,7 +23,7 @@ public:
     Grid(int quadSize = 2, int Nquads = 20);
 
     void draw() const;
-
+    void drawCell();
     void bindUniformBlock(int gateway, const std::string& name) const;
 private:
     Shader shader; 
@@ -109,6 +109,35 @@ void Grid::draw() const
     glBindVertexArray(this->VAO);
     glDrawArrays(GL_LINES, 0, vertexCount);
     glBindVertexArray(0);
+}
+
+void Grid::drawCell()
+{
+    pos = glm::vec3(0.0f);
+    rotation = glm::vec3(0.0f);
+    float desloc = gridSize / 2.0f;
+    //floor
+    draw();
+
+    //roof
+    pos = glm::vec3(0.0f, 2 * desloc, 0.0f);
+    draw();
+
+    //walls
+    rotation = glm::vec3(90.0f, 0.0f, 0.0f);
+    pos = glm::vec3(0.0f, desloc, desloc);
+    draw();
+    pos.z = - desloc;
+    draw();
+
+    rotation = glm::vec3(0.0f, 0.0f, 90.0f);
+    pos = glm::vec3(desloc, desloc, 0.0f);
+    draw();
+    pos.x = - desloc;
+    draw();
+
+    rotation = glm::vec3(0.0f);
+    pos = glm::vec3(0.0f);
 }
 
 void Grid::bindUniformBlock(int gateway, const std::string& name) const

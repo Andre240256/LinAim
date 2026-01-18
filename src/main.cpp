@@ -26,6 +26,7 @@ void processInput(GLFWwindow * window, float deltaTime);
 
 unsigned int loadUBO();
 
+unsigned int Shader::currentProgramID = 0;
 Player player(glm::vec3(0.0f, 1.5f, 10.0f));
 
 float deltaTime = 0.0f;

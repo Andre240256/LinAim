@@ -28,6 +28,7 @@ public:
 
     unsigned int getUniformBlockID(const std::string& name) const;
 private:
+    static unsigned int currentProgramID;
 };
 
 //constructor
@@ -107,7 +108,10 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
 
 void Shader::use() const
 {
-    glUseProgram(this->ID);
+    if(this->ID != currentProgramID){
+        glUseProgram(this->ID);
+        currentProgramID = this->ID;
+    }
 }
 
 //setters

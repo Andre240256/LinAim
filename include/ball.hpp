@@ -15,6 +15,7 @@ class Ball
 public:
     glm::vec3 pos;
     glm::vec3 scale;
+    bool active;
 
     unsigned int VAO;
     unsigned int indexCount;
@@ -40,6 +41,7 @@ Ball::Ball(glm::vec3 startPos, int xSegments, int ySegments) : shader("src/shade
     this->pos = startPos;
     this->scale = glm::vec3(1.0f);
     this->ballColor = glm::vec3(0.1843, 0.1843, 0.9255);
+    this->active = true;
     setupBall(xSegments, ySegments);
 }
 

@@ -14,16 +14,16 @@ class Bullet : public Ball{
 public:
     glm::vec3 direction;
     float lifeTime;
-    bool active;
 
     Bullet(glm::vec3 startPos, glm::vec3 direction);
 
-    commands updatePos(GLFWwindow * window, float deltaTime, const Ball& target);
+    glm::vec3 updatePos(GLFWwindow * window, float deltaTime);
+    bool checkCollision(const glm::vec3& newPosition, const glm::vec3& pos, Ball& target);
+
 private:
     float velocity;
     int countCheck;
 
-    bool checkCollision(const glm::vec3& newPosition, const glm::vec3& pos, const Ball& target);
 };
 
 Bullet::Bullet(glm::vec3 startPos, glm::vec3 direction) : Ball(startPos)
@@ -36,27 +36,22 @@ Bullet::Bullet(glm::vec3 startPos, glm::vec3 direction) : Ball(startPos)
     this->lifeTime = 0;
 }
 
-commands Bullet::updatePos(GLFWwindow * window, float deltaTime, const Ball& target)
+glm::vec3 Bullet::updatePos(GLFWwindow * window, float deltaTime)
 {
     lifeTime += deltaTime;
     if(lifeTime > 10.0f){
         active = false;
-        return TIMEOUT;
     }
     
     float distance = deltaTime * this->velocity;
 
     glm::vec3 oldPos = this->pos;
     this->pos += distance * this->direction;
-    if(checkCollision(pos, oldPos, target)){
-        active = false;
-        return COLISION;
-    }
 
-    return NOTHING;
+    return oldPos;
 }
 
-bool Bullet::checkCollision(const glm::vec3& newPosition, const glm::vec3& pos, const Ball& target)
+bool Bullet::checkCollision(const glm::vec3& newPosition, const glm::vec3& pos, Ball& target)
 {
     glm::vec3 vecToTarget = target.pos - pos;
     glm::vec3 bulletPath = newPosition - pos;
@@ -78,7 +73,9 @@ bool Bullet::checkCollision(const glm::vec3& newPosition, const glm::vec3& pos, 
     }
 
     float dist = glm::distance(closestPoint, target.pos);
-    if(dist <= (this->scale.x + target.scale.x))
+    if(dist <= (this->scale.x + target.scale.x)){
+        target.active = false;
         return true;
+    }
     return false;
 }

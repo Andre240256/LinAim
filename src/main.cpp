@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <random>
+#include <chrono>
 #include <iostream>
 
 #include "../include/shader.hpp"
@@ -26,11 +27,18 @@ void mouse_button_callback(GLFWwindow * window, int button, int actions, int mod
 
 void processInput(GLFWwindow * window, float deltaTime);
 
+float genRandomFloat(float inf, float max);
+int genRandomInt(int inf, int max);
+
 unsigned int loadUBO();
+
+std::random_device rd;
+std::mt19937 gen(rd());
 
 unsigned int Shader::currentProgramID = 0;
 Player player(glm::vec3(0.0f, 1.5f, 10.0f));
 std::vector<Bullet*> bullets;
+std::vector<Ball *> balls;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -76,10 +84,18 @@ int main()
     unsigned int matricesUBO = loadUBO();
     
     Grid grid;
-    Ball ball(glm::vec3(0.0f, 3.0f, 0.0f));
+    for(int i = 0; i < 3; i++)
+        balls.push_back(
+            new Ball(
+                glm::vec3(
+                        genRandomFloat(-10.0f, 10.0f),
+                        3.0f + genRandomFloat(-1.0f, 3.0f),
+                        0.0f
+                        )
+                )
+            );
     Crosshair crosshair;
 
-    ball.bindUniformBlock(0, "Matrices");
     grid.bindUniformBlock(0, "Matrices");
 
     glm::mat4 model;
@@ -94,8 +110,8 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        if(i++ % 40 == 0)
-            std::cout << "FPS: " << 1.0/deltaTime << "\n", i = 1;
+        // if(i++ % 40 == 0)
+        //     std::cout << "FPS: " << 1.0/deltaTime << "\n", i = 1;
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -112,27 +128,42 @@ int main()
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         for(auto it = bullets.begin(); it != bullets.end();){
-            Bullet* b = *it;
-
-            int command = b->updatePos(window, deltaTime, ball);
-            if(!(b->active)){
-                if(command == COLISION)
-                    destroyed = true;
-                delete b;
+            Bullet * b = *it;
+            if(b->active)
+                b->draw(), it++;
+            else 
                 it = bullets.erase(it);
-            }
-            else{
-                ++it;
-            }
+        }
 
+        for(Ball * b : balls){
+            if(b->active)
+                b->draw();
+            else{
+                b->active = true;
+                b->pos = glm::vec3(
+                    genRandomFloat(-10.0f, 10.0f),
+                    3.0f + genRandomFloat(-1.0f, 3.0f),
+                    0.0f
+                );
+            }
+        }
+
+        for(auto it = bullets.begin(); it != bullets.end(); it++){
+            Bullet* b = *it;
+            glm::vec3 oldPos = b->updatePos(window, deltaTime);
+
+            if(!(b->active)){
+                continue;
+            }
+  
+            for(auto itr = balls.begin(); itr != balls.end(); ++itr)
+            {
+                Ball* ball = *itr;
+                b->checkCollision(b->pos, oldPos, *ball);   
+            }
         }
         
-        for(Bullet * b : bullets){
-            b->draw();
-        }
 
-        if(!destroyed)
-            ball.draw();
         grid.drawCell();
         crosshair.draw(static_cast<float>(WIDTH), static_cast<float>(HEIGHT));
         
@@ -167,6 +198,18 @@ unsigned int loadUBO()
     return ubo;
 }
 
+float genRandomFloat(float inf, float max)
+{
+    std::uniform_real_distribution floatDist(inf, max);
+    return floatDist(gen);
+}
+
+int genRandomInt(int inf, int max)
+{
+    std::uniform_int_distribution intDis(inf, max);
+    return intDis(gen);
+}
+
 void framebuffer_size_callback(GLFWwindow * window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -186,7 +229,7 @@ void mouse_button_callback(GLFWwindow * window, int button, int action, int mods
 {
     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
-       bullets.push_back(new Bullet(player.Pos + player.Front * 0.5f, player.Front));
+       bullets.push_back(new Bullet(player.Pos + player.Front * 1.0f, player.Front));
        bullets[bullets.size() - 1]->bindUniformBlock(0, "Matrices"); 
     }
 }

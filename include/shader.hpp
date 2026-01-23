@@ -27,6 +27,7 @@ public:
     void setInt(const std::string& name, int val) const;
 
     unsigned int getUniformBlockID(const std::string& name) const;
+    void bindUniformBlock(int gateway, const std::string& name) const;
 private:
     static unsigned int currentProgramID;
 };
@@ -112,6 +113,11 @@ void Shader::use() const
         glUseProgram(this->ID);
         currentProgramID = this->ID;
     }
+}
+
+void Shader::bindUniformBlock(int gateway, const std::string& name) const
+{
+    glUniformBlockBinding(this->ID, getUniformBlockID(name), gateway);
 }
 
 //setters

@@ -24,7 +24,6 @@ public:
 
     void draw() const;
     void drawCell();
-    void bindUniformBlock(int gateway, const std::string& name) const;
 private:
     Shader shader; 
     unsigned int VBO, VAO;
@@ -39,6 +38,7 @@ Grid::Grid(int quadSize, int Nquads): shader("src/shaders/gridShader.vs", "src/s
     this->pos = glm::vec3(0.0f, 0.0f, 0.0f);
     this->rotation = glm::vec3(0.0f);
     this->scale = glm::vec3(1.0f);
+    shader.bindUniformBlock(0, "Matrices");
     setupGrid(quadSize, Nquads);
 }
 
@@ -138,9 +138,4 @@ void Grid::drawCell()
 
     rotation = glm::vec3(0.0f);
     pos = glm::vec3(0.0f);
-}
-
-void Grid::bindUniformBlock(int gateway, const std::string& name) const
-{
-    glUniformBlockBinding(shader.ID, shader.getUniformBlockID(name), gateway);
 }

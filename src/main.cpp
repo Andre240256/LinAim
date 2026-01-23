@@ -96,22 +96,15 @@ int main()
             );
     Crosshair crosshair;
 
-    grid.bindUniformBlock(0, "Matrices");
-
     glm::mat4 model;
     glm::mat4 view;
     glm::mat4 projection;
     
-    int i = 0;
-    bool destroyed = false;
     while(!glfwWindowShouldClose(window))
     {
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
-        // if(i++ % 40 == 0)
-        //     std::cout << "FPS: " << 1.0/deltaTime << "\n", i = 1;
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -230,6 +223,5 @@ void mouse_button_callback(GLFWwindow * window, int button, int action, int mods
     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
        bullets.push_back(new Bullet(player.Pos + player.Front * 1.0f, player.Front));
-       bullets[bullets.size() - 1]->bindUniformBlock(0, "Matrices"); 
     }
 }

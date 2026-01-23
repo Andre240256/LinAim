@@ -23,7 +23,6 @@ public:
     Ball(glm::vec3 startPos = glm::vec3(0.0f), int xSegments = 30, int ySegments = 30);
 
     void draw() const;
-    void bindUniformBlock(int gateWay, const std::string& name) const;
 
 protected:
     glm::vec3 ballColor;
@@ -42,6 +41,7 @@ Ball::Ball(glm::vec3 startPos, int xSegments, int ySegments) : shader("src/shade
     this->scale = glm::vec3(1.0f);
     this->ballColor = glm::vec3(0.1843, 0.1843, 0.9255);
     this->active = true;
+    shader.bindUniformBlock(0, "Matrices");
     setupBall(xSegments, ySegments);
 }
 
@@ -116,9 +116,4 @@ void Ball::setupBall(int xSegments, int ySegments)
     glEnableVertexAttribArray(0);
 
     glBindVertexArray(0);
-}
-
-void Ball::bindUniformBlock(int gateway, const std::string& name) const
-{
-    glUniformBlockBinding(this->shader.ID, shader.getUniformBlockID(name), gateway);
 }

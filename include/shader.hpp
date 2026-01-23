@@ -100,7 +100,8 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
     if(!success)
     {
         glGetProgramInfoLog(this->ID, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED " << infoLog << std::endl; 
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED " << infoLog 
+        << std::endl << vertexPath << std::endl << fragmentPath << std::endl; 
     }
 
     glDeleteShader(vertex);

@@ -14,6 +14,7 @@ find_package(glm REQUIRED)
 
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/vendor)
 
 
 include_directories(${GLM_INCLUDE_DIRS})

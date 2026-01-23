@@ -6,7 +6,7 @@
 #include <vector>
 #include <iostream>
 
-#include "../vendor/stb_image.h"
+#include "stb_image.h"
 #include "shader.hpp"
 
 class SkyBox

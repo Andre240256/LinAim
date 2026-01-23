@@ -10,7 +10,7 @@
 #include <iostream>
 #include <vector>
 
-#include "shader.hpp"
+#include "core/shader.hpp"
 
 class Grid{
 public:

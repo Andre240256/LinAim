@@ -1,7 +1,5 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
-
 #include "ball.hpp"
 
 typedef enum updatePos{

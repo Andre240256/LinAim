@@ -1,30 +1,6 @@
-#pragma once
+#include "entities/crosshair.hpp"
 
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <vector>
-#include <cmath>
-#include "shader.hpp"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-class Crosshair{
-public:
-    unsigned int VAO, VBO;
-    Shader shader;
-    int vertexCount;
-
-    Crosshair();
-
-    void draw(float screenWidht, float screenHeight);
-
-private:
-};
-
-Crosshair::Crosshair() : shader("src/shaders/crosshair.vs", "src/shaders/crosshair.fs")
+Crosshair::Crosshair() : shader("assets/shaders/crosshair.vs", "assets/shaders/crosshair.fs")
 {
     std::vector<float> vertices;
     vertices.push_back(0.0f);
@@ -69,7 +45,7 @@ void Crosshair::draw(float screenWidth, float screenHeight)
     );
 
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::scale(model, glm::vec3(10.0f, 10.0f, 1.0f));
+    model = glm::scale(model, glm::vec3(8.0f, 8.0f, 1.0f));
 
     shader.setMat4("projection", projection);
     shader.setMat4("model", model);
@@ -79,5 +55,5 @@ void Crosshair::draw(float screenWidth, float screenHeight)
     glDrawArrays(GL_TRIANGLE_FAN, 0, vertexCount);
     glBindVertexArray(0);
 
-    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 }

@@ -1,39 +1,6 @@
-#pragma once
+#include "entities/grid.hpp"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <iostream>
-#include <vector>
-
-#include "shader.hpp"
-
-class Grid{
-public:
-    glm::vec3 pos;
-    glm::vec3 rotation;
-    glm::vec3 scale;
-
-    float gridSize;
-
-    Grid(int quadSize = 2, int Nquads = 20);
-
-    void draw() const;
-    void drawCell();
-private:
-    Shader shader; 
-    unsigned int VBO, VAO;
-    int vertexCount;
-
-    glm::mat4 getModelMatrix() const;
-    void setupGrid(int quadSize, int Nquads);
-};
-
-Grid::Grid(int quadSize, int Nquads): shader("src/shaders/gridShader.vs", "src/shaders/gridShader.fs")
+Grid::Grid(int quadSize, int Nquads): shader("assets/shaders/gridShader.vs", "assets/shaders/gridShader.fs")
 {
     this->pos = glm::vec3(0.0f, 0.0f, 0.0f);
     this->rotation = glm::vec3(0.0f);

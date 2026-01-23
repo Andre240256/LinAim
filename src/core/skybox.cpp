@@ -1,34 +1,6 @@
-#pragma once
+#include "core/skyBox.hpp"
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <string>
-#include <vector>
-#include <iostream>
-
-#ifndef STB_IMAGE_IMPLEMENTATION
-    #define STB_IMAGE_IMPLEMENTATION
-#endif
-#include "../vendor/stb_image.h"
-#include "shader.hpp"
-
-class SkyBox
-{
-public:
-    unsigned int ID, VAO, VBO;
-    Shader shader;
-
-    SkyBox(const std::string& texturePath);
-
-    void draw();
-    void bindUniformBlock(int gateway, const std::string& name) const;
-    
-private:
-    void setupCubeMap(const std::string& texturePath);
-    void setupCube();
-};
-
-SkyBox::SkyBox(const std::string& texturePath) : shader("src/shaders/skyBox.vs", "src/shaders/skyBox.fs")
+SkyBox::SkyBox(const std::string& texturePath) : shader("assets/shaders/skyBox.vs", "assets/shaders/skyBox.fs")
 {
     shader.bindUniformBlock(0, "Matrices");
     setupCube();

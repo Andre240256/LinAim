@@ -1,44 +1,4 @@
-#pragma once
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <iostream>
-
-class Camera
-{
-public:
-    Camera(glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f),
-        glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f),
-        glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f));
-
-    virtual void updatePos(GLFWwindow * window, float camSpeed);
-    void updateDir(GLFWwindow * window, double xposIn, double yposIn);
-    void updateZoom(double yoffset);
-
-    glm::mat4 getViewMat();
-
-    float yaw;
-    float pitch;
-    float zoom;
-
-    float lastX, lastY;
-    bool firstMouse;
-
-    glm::vec3 Pos;
-    glm::vec3 Front;
-    glm::vec3 Up;
-
-protected:
-
-    float sensitivity;
-    float velocity;
-private:
-};
+#include "core/camera.hpp"
 
 Camera::Camera(glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp)
 {
@@ -50,8 +10,8 @@ Camera::Camera(glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp)
     this->Front = cameraFront;
     this->Up = cameraUp;
 
-    this->sensitivity = 0.3f;
-    this->velocity = 2.5f;
+    this->sensitivity = 0.05f;
+    this->velocity = 4.0f;
 
     this->lastX = 640.0f;
     this->lastY = 360.0f;
@@ -100,8 +60,8 @@ void Camera::updateDir(GLFWwindow * window, double xposIn, double yposIn)
 
     lastX = xpos, lastY = ypos;
 
-    yaw += xoffset * sensitivity;
-    pitch += yoffset * sensitivity;
+    // yaw += xoffset * this->sensitivity;
+    pitch += yoffset * this->sensitivity;
 
     if(pitch > 89.0f)
         pitch = 89.0f;

@@ -16,6 +16,7 @@
 #include "../include/crosshair.hpp"
 #include "../include/grid.hpp"
 #include "../include/bullet.hpp"
+#include "../include/skyBox.hpp"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -83,6 +84,7 @@ int main()
 
     unsigned int matricesUBO = loadUBO();
     
+    SkyBox skybox("assets/textures/skyCubeMap/");
     Grid grid;
     for(int i = 0; i < 3; i++)
         balls.push_back(
@@ -158,6 +160,8 @@ int main()
         
 
         grid.drawCell();
+        
+        skybox.draw();
         crosshair.draw(static_cast<float>(WIDTH), static_cast<float>(HEIGHT));
         
         glfwSwapBuffers(window);

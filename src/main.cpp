@@ -34,9 +34,6 @@ StateGame * game = nullptr;
 
 int main()
 {
-    std::cout << "oi" << std::endl;
-    fflush(stdin);
-
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -74,13 +71,7 @@ int main()
 
     game = new StateGame();
     game->setWindow(window);
-
-    std::cout << "oi" << std::endl;
-    fflush(stdin);
-    game->run();
-    std::cout << "oi" << std::endl;
-    fflush(stdin);
-    
+    game->run();  
 
     glfwTerminate();
     return 0;

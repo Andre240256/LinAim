@@ -4,8 +4,6 @@
 StateGame::StateGame() :
 skybox("assets/textures/skyCubeMap/"), player(glm::vec3(0.0f, 1.5f, 10.0f))
 {
-    std::cout << "init construction of game" << std::endl;
-    fflush(stdin);
     this->deltaTime = 0.0f;
     this->lastFrame = 0.0f;
 

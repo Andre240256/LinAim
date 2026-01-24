@@ -60,7 +60,7 @@ void Camera::updateDir(GLFWwindow * window, double xposIn, double yposIn)
 
     lastX = xpos, lastY = ypos;
 
-    // yaw += xoffset * this->sensitivity;
+    yaw += xoffset * this->sensitivity;
     pitch += yoffset * this->sensitivity;
 
     if(pitch > 89.0f)

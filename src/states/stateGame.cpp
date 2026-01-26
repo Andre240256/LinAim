@@ -54,8 +54,10 @@ stateApp StateGame::run()
             Bullet * bullet = *it;
             if(bullet->active)
                 bullet->draw(), it++;
-            else    
+            else{    
+                delete *it;
                 it = bullets.erase(it);
+            }
         }
 
         for(Ball * ball : balls){

@@ -28,6 +28,8 @@ StateGame::~StateGame()
 //Public Functions
 stateApp StateGame::run() 
 {
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     glm::mat4 model;
     glm::mat4 view;
     glm::mat4 projection;
@@ -91,6 +93,7 @@ stateApp StateGame::run()
         glfwPollEvents();
     }
 
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     return currentState;
 }
 

@@ -16,6 +16,8 @@ include_directories(${GLM_INCLUDE_DIRS})
 file(GLOB_RECURSE SOURCES
     "src/*.cpp"
     "src/*.c"
+    "vendor/*.cpp"
+    "vendor/*.c"
 )
 
 file(GLOB_RECURSE HEADERS

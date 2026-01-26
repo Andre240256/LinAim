@@ -4,15 +4,15 @@ StateStartMenu::StateStartMenu(GLFWwindow * window)
 {
     this->window = window;
     this->buttonNormalSize = {200.0f, 40.0f};
+    this->buttonBigSize = {400.0f, 80.0f};
 }
 
 stateApp StateStartMenu::run()
 {
-    glfwSetInputMode(this->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     stateApp currentState = stateApp::START_MENU;
     while(!glfwWindowShouldClose(this->window) && currentState == stateApp::START_MENU)
     {
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.3f, 0.5f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         glfwPollEvents();
@@ -23,28 +23,53 @@ stateApp StateStartMenu::run()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImGui::Begin("Start Menu");
+        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->WorkPos);
+        ImGui::SetNextWindowSize(viewport->WorkSize);
+
+        ImGuiWindowFlags windowFlags = (
+            ImGuiWindowFlags_NoDecoration |
+            ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoSavedSettings |
+            ImGuiWindowFlags_NoBringToFrontOnFocus |
+            ImGuiWindowFlags_NoNavFocus
+        );
+
+        if (configUI::MainFont) ImGui::PushFont(configUI::MainFont);
+
+        ImGui::Begin("StartMenuOverlay", nullptr, windowFlags);
         {
             float windowWidth = ImGui::GetWindowSize().x;
-            float centerPosX = (windowWidth - this->buttonNormalSize.x) * 0.5f;
+            float centerPosX = (windowWidth - this->buttonBigSize.x) * 0.5f;
+            float windowHeight = ImGui::GetWindowSize().y;
+            float centerPosY = windowHeight / 3 - this->buttonBigSize.y * 0.5f;
 
             ImGui::SetCursorPosX(centerPosX);
-            if(ImGui::Button("Iniciar Jogo", this->buttonNormalSize)){
+            ImGui::SetCursorPosY(centerPosY);
+            if(ImGui::Button("Play Game", this->buttonBigSize)){
                 currentState = stateApp::GAME;
-                std::cout << "Botao clicado" << std::endl;
             }
 
-            ImGui::Spacing();
-
+            centerPosY += windowHeight / 6;
+            ImGui::SetCursorPosY(centerPosY);
             ImGui::SetCursorPosX(centerPosX);
 
-            if(ImGui::Button("Sair do jogo", this->buttonNormalSize)){
+            if(ImGui::Button("Settings", this->buttonBigSize)){
+            }
+
+            float yStep = windowHeight / 6 - this->buttonBigSize.y - this->buttonNormalSize.y * 0.5f;
+            ImGui::Dummy(ImVec2(0.0f, yStep));
+
+            centerPosX = (windowWidth - this->buttonNormalSize.x) * 0.5f;
+            ImGui::SetCursorPosX(centerPosX);
+            if(ImGui::Button("quit", this->buttonNormalSize)){
                 glfwSetWindowShouldClose(this->window, true);
                 currentState = stateApp::EXIT;
-                std::cout << "Saindo do jogo" << std::endl;
             }
         }
         ImGui::End();
+        if (configUI::MainFont) ImGui::PopFont();
         
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

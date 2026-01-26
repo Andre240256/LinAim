@@ -1,0 +1,19 @@
+# Bibliotecas Gráficas Genéricas
+leak:libGL
+leak:libGLX
+leak:libglapi
+
+# Drivers Intel (Mesa)
+leak:iris_dri.so
+leak:i965_dri.so
+leak:crocus_dri.so
+leak:swrast_dri.so
+leak:libdrm_intel
+
+# Sistema de Janelas e Som (Geral Linux)
+leak:libX11
+leak:libXrandr
+leak:libXcursor
+leak:libdbus
+leak:libasound
+leak:libpulse

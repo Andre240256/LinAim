@@ -1,20 +1,31 @@
 #include "entities/ball.hpp"
 
-Ball::Ball(glm::vec3 startPos, int xSegments, int ySegments) : shader("assets/shaders/ballShader.vs", "assets/shaders/ballShader.fs")
+Shader * Ball::shader = nullptr;
+
+void Ball::initShader()
+{
+    if(shader == nullptr){
+        shader = new Shader("assets/shaders/ballShader.vs", "assets/shaders/ballShader.fs");
+    }
+}
+
+Ball::Ball(glm::vec3 startPos, int xSegments, int ySegments)
 {
     this->pos = startPos;
     this->scale = glm::vec3(1.0f);
     this->ballColor = glm::vec3(0.1843, 0.1843, 0.9255);
     this->active = true;
-    shader.bindUniformBlock(0, "Matrices");
+    shader->bindUniformBlock(0, "Matrices");
     setupBall(xSegments, ySegments);
 }
 
 void Ball::draw() const
 {
-    shader.use();
-    shader.setMat4("model", getModelMatrix());
-    shader.setVec3("ballColor", ballColor);
+    if(shader == nullptr) return;
+    
+    shader->use();
+    shader->setMat4("model", getModelMatrix());
+    shader->setVec3("ballColor", ballColor);
 
 
     glBindVertexArray(this->VAO);

@@ -1,11 +1,21 @@
 #include "entities/grid.hpp"
 
-Grid::Grid(int quadSize, int Nquads): shader("assets/shaders/gridShader.vs", "assets/shaders/gridShader.fs")
+Shader * Grid::shader = nullptr;
+
+void Grid::initShader()
 {
+    if(shader == nullptr){
+        shader = new Shader("assets/shaders/gridShader.vs", "assets/shaders/gridShader.fs");
+    }
+}
+
+Grid::Grid(int quadSize, int Nquads)
+{
+    initShader();
     this->pos = glm::vec3(0.0f, 0.0f, 0.0f);
     this->rotation = glm::vec3(0.0f);
     this->scale = glm::vec3(1.0f);
-    shader.bindUniformBlock(0, "Matrices");
+    shader->bindUniformBlock(0, "Matrices");
     setupGrid(quadSize, Nquads);
 }
 
@@ -70,8 +80,10 @@ glm::mat4 Grid::getModelMatrix() const
 
 void Grid::draw() const
 {   
-    shader.use();
-    shader.setMat4("model", this->getModelMatrix());
+    if(shader == nullptr) return;
+
+    shader->use();
+    shader->setMat4("model", this->getModelMatrix());
     
     glBindVertexArray(this->VAO);
     glDrawArrays(GL_LINES, 0, vertexCount);

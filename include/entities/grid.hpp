@@ -14,6 +14,8 @@
 
 class Grid{
 public:
+    static void initShader();
+    
     glm::vec3 pos;
     glm::vec3 rotation;
     glm::vec3 scale;
@@ -25,7 +27,8 @@ public:
     void draw() const;
     void drawCell();
 private:
-    Shader shader; 
+
+    static Shader * shader; 
     unsigned int VBO, VAO;
     int vertexCount;
 

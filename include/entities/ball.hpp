@@ -10,6 +10,8 @@
 class Ball
 {
 public:
+    static void initShader();
+
     glm::vec3 pos;
     glm::vec3 scale;
     bool active;
@@ -23,10 +25,12 @@ public:
 
 protected:
     glm::vec3 ballColor;
-    Shader shader;
     
     glm::mat4 getModelMatrix() const;
+    static Shader * shader;
+    
 private:
+
     unsigned int VBO, EBO;
     
     void setupBall(int xSegments, int ySegments);

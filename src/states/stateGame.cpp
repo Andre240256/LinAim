@@ -4,6 +4,9 @@
 StateGame::StateGame() :
 skybox("assets/textures/skyCubeMap/"), player(glm::vec3(0.0f, 1.5f, 10.0f))
 {
+    Ball::initShader();
+    Grid::initShader();
+
     this->deltaTime = 0.0f;
     this->lastFrame = 0.0f;
 

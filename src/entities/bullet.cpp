@@ -4,7 +4,7 @@ Bullet::Bullet(glm::vec3 startPos, glm::vec3 direction) : Ball(startPos)
 {
     this->ballColor = glm::vec3(0.7f);
     this->scale = glm::vec3(0.05f);
-    shader.setVec3("ballColor", ballColor);
+    shader->setVec3("ballColor", ballColor);
     this->direction = glm::normalize(direction);
     this->velocity = 500.0f;
     this->lifeTime = 0;

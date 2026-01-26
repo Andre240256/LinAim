@@ -20,6 +20,7 @@ public:
     int vertexCount;
 
     Crosshair();
+    ~Crosshair();
 
     void draw(float screenWidht, float screenHeight);
 

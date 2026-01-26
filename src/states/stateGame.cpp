@@ -14,6 +14,17 @@ skybox("assets/textures/skyCubeMap/"), player(glm::vec3(0.0f, 1.5f, 10.0f))
     setBallsVector(); 
 }
 
+StateGame::~StateGame()
+{
+    for(auto it = bullets.begin(); it != bullets.end(); it++)
+        delete *it;
+    bullets.clear();
+    
+    for(auto it = balls.begin(); it != balls.end(); it++)
+        delete *it;
+    balls.clear();
+}
+
 //Public Functions
 stateApp StateGame::run() 
 {

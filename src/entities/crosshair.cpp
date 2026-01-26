@@ -32,6 +32,12 @@ Crosshair::Crosshair() : shader("assets/shaders/crosshair.vs", "assets/shaders/c
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
 }
 
+Crosshair::~Crosshair()
+{
+    glDeleteBuffers(1, &this->VBO);
+    glDeleteVertexArrays(1, &this->VAO);
+}
+
 void Crosshair::draw(float screenWidth, float screenHeight)
 {
     glDisable(GL_DEPTH_TEST);

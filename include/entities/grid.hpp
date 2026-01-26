@@ -23,6 +23,7 @@ public:
     float gridSize;
 
     Grid(int quadSize = 2, int Nquads = 20);
+    ~Grid();
 
     void draw() const;
     void drawCell();

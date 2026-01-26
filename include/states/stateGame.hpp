@@ -33,6 +33,7 @@ public:
     Grid grid;
 
     StateGame();
+    ~StateGame();
 
     stateApp run();
     void setWindow(GLFWwindow * window);

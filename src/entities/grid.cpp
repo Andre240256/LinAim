@@ -19,6 +19,12 @@ Grid::Grid(int quadSize, int Nquads)
     setupGrid(quadSize, Nquads);
 }
 
+Grid::~Grid()
+{
+    glDeleteBuffers(1, &this->VBO);
+    glDeleteVertexArrays(1, &this->VAO);
+}
+
 void Grid::setupGrid(int quadSize, int Nquads)
 {
     std::vector <float> vertices;

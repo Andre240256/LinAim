@@ -16,6 +16,7 @@ public:
     Shader shader;
 
     SkyBox(const std::string& texturePath);
+    ~SkyBox();
 
     void draw();
     void bindUniformBlock(int gateway, const std::string& name) const;

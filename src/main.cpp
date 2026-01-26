@@ -71,7 +71,9 @@ int main()
 
     game = new StateGame();
     game->setWindow(window);
-    game->run();  
+    game->run();
+    
+    delete game;
 
     glfwTerminate();
     return 0;

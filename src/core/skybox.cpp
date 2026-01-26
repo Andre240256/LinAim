@@ -7,6 +7,12 @@ SkyBox::SkyBox(const std::string& texturePath) : shader("assets/shaders/skyBox.v
     setupCubeMap(texturePath);
 }
 
+SkyBox::~SkyBox()
+{
+    glDeleteBuffers(1, &this->VBO);
+    glDeleteVertexArrays(1, &this->VAO);
+}
+
 void SkyBox::draw()
 {
     glDepthFunc(GL_LEQUAL);

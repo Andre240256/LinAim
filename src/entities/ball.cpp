@@ -19,6 +19,12 @@ Ball::Ball(glm::vec3 startPos, int xSegments, int ySegments)
     setupBall(xSegments, ySegments);
 }
 
+Ball::~Ball()
+{
+    glDeleteBuffers(1, &this->VBO);
+    glDeleteVertexArrays(1, &this->VAO);
+}
+
 void Ball::draw() const
 {
     if(shader == nullptr) return;

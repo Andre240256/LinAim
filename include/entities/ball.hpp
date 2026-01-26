@@ -20,7 +20,8 @@ public:
     unsigned int indexCount;
     
     Ball(glm::vec3 startPos = glm::vec3(0.0f), int xSegments = 30, int ySegments = 30);
-
+    ~Ball();
+    
     void draw() const;
 
 protected:

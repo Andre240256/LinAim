@@ -34,6 +34,9 @@ stateApp StateGame::run()
     glm::mat4 projection;
 
     this->player.setSensibility(configUI::data.sensitivity);
+    this->player.lastX = 640.0f;
+    this->player.lastY = 360.0f;
+    this->player.firstMouse = true;
 
     this->deltaTime = 0.0f;
     this->lastFrame = 0.0f;

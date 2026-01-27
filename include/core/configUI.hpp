@@ -9,6 +9,8 @@
 class configUI{
 public:
     static ImFont * MainFont;
+    static ImGuiWindowFlags windowFlags;
 
     static void setup();
+private:
 };

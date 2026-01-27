@@ -7,8 +7,7 @@ skybox("assets/textures/skyCubeMap/"), player(glm::vec3(0.0f, 1.5f, 10.0f))
     Ball::initShader();
     Grid::initShader();
 
-    this->deltaTime = 0.0f;
-    this->lastFrame = 0.0f;
+    this->escPressedLastFrame = false;
 
     loadMatricesUBO(0);
     setBallsVector(); 
@@ -33,6 +32,9 @@ stateApp StateGame::run()
     glm::mat4 model;
     glm::mat4 view;
     glm::mat4 projection;
+
+    this->deltaTime = 0.0f;
+    this->lastFrame = 0.0f;
 
     stateApp currentState = stateApp::GAME;
     while(!glfwWindowShouldClose(window) && currentState == stateApp::GAME)
@@ -115,11 +117,13 @@ void StateGame::deltaTimeCalc()
 
 stateApp StateGame::processInput()
 {
-    if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    bool escPressed = glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+    if(escPressed && !escPressedLastFrame)
     {
-        glfwSetWindowShouldClose(this->window, true);
-        return stateApp::EXIT;
+        escPressedLastFrame = escPressed;
+        return stateApp::SETTINGS;
     }
+    escPressedLastFrame = escPressed;
     player.updatePos(this->window, this->deltaTime);
     return stateApp::GAME;
 }

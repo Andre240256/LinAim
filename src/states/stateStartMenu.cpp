@@ -3,6 +3,7 @@
 StateStartMenu::StateStartMenu(GLFWwindow * window) 
 {
     this->window = window;
+    this->escPressedLastFrame = false;
     this->buttonNormalSize = {200.0f, 40.0f};
     this->buttonBigSize = {400.0f, 80.0f};
 }
@@ -27,18 +28,9 @@ stateApp StateStartMenu::run()
         ImGui::SetNextWindowPos(viewport->WorkPos);
         ImGui::SetNextWindowSize(viewport->WorkSize);
 
-        ImGuiWindowFlags windowFlags = (
-            ImGuiWindowFlags_NoDecoration |
-            ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoSavedSettings |
-            ImGuiWindowFlags_NoBringToFrontOnFocus |
-            ImGuiWindowFlags_NoNavFocus
-        );
-
         if (configUI::MainFont) ImGui::PushFont(configUI::MainFont);
 
-        ImGui::Begin("StartMenuOverlay", nullptr, windowFlags);
+        ImGui::Begin("StartMenuOverlay", nullptr, configUI::windowFlags);
         {
             float windowWidth = ImGui::GetWindowSize().x;
             float centerPosX = (windowWidth - this->buttonBigSize.x) * 0.5f;
@@ -56,6 +48,7 @@ stateApp StateStartMenu::run()
             ImGui::SetCursorPosX(centerPosX);
 
             if(ImGui::Button("Settings", this->buttonBigSize)){
+                currentState = stateApp::SETTINGS;
             }
 
             float yStep = windowHeight / 6 - this->buttonBigSize.y - this->buttonNormalSize.y * 0.5f;
@@ -82,10 +75,12 @@ stateApp StateStartMenu::run()
 
 stateApp StateStartMenu::processInput()
 {
-    if(glfwGetKey(this->window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
-        glfwSetWindowShouldClose(window, true);
-        return stateApp::EXIT;
+    bool escPressed = glfwGetKey(this->window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
+    if(escPressed && !escPressedLastFrame){
+        escPressedLastFrame = escPressed;
+        return stateApp::SETTINGS;
     }
+    escPressedLastFrame = escPressed;
 
     return stateApp::START_MENU;
 }

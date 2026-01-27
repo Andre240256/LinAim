@@ -2,6 +2,15 @@
 
 ImFont* configUI::MainFont = nullptr;
 
+ImGuiWindowFlags configUI::windowFlags = (
+        ImGuiWindowFlags_NoDecoration |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoSavedSettings |
+        ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus
+    );
+
 void configUI::setup()
 {
     ImGuiIO& io = ImGui::GetIO();

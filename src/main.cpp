@@ -8,6 +8,7 @@
 #include <random>
 #include <chrono>
 #include <iostream>
+#include <thread>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -26,6 +27,7 @@
 #include "core/skyBox.hpp"
 #include "states/stateGame.hpp"
 #include "states/stateStartMenu.hpp"
+#include "states/stateSettings.hpp"
 
 const unsigned int WIDTH = 1280;
 const unsigned int HEIGHT = 720;
@@ -38,6 +40,7 @@ void mouse_button_callback(GLFWwindow * window, int button, int actions, int mod
 unsigned int Shader::currentProgramID = 0;
 StateGame * game = nullptr;
 StateStartMenu * startmenu = nullptr;
+StateSettings * settings = nullptr;
 
 int main()
 {
@@ -82,8 +85,12 @@ int main()
     glViewport(0, 0, WIDTH, HEIGHT);
 
     stateApp currentState = stateApp::START_MENU;
+    stateApp lastState = stateApp::START_MENU;
 
-    while(currentState != stateApp::EXIT)
+    game = new StateGame();
+    game->setWindow(window);
+
+    while(currentState != stateApp::EXIT){
         switch(currentState){
             case stateApp::GAME:
                 if(game == nullptr){
@@ -91,6 +98,9 @@ int main()
                     game->setWindow(window);
                 }
                 currentState = game->run();
+
+                if(currentState == stateApp::SETTINGS)
+                    lastState = stateApp::GAME;
                 break;
 
             case stateApp::START_MENU:
@@ -98,17 +108,32 @@ int main()
                     startmenu = new StateStartMenu(window);
                 }
                 currentState = startmenu->run();
+
+                if(currentState == stateApp::SETTINGS)
+                    lastState = stateApp::START_MENU;
+                break;
+
+            case stateApp::SETTINGS:
+                if(settings == nullptr){
+                    settings = new StateSettings(window);
+                }
+                currentState = settings->run(lastState);
+                game->player.setSensibility(settings->sensibility); 
                 break;
                 
             case stateApp::EXIT:
                 break;
         }
+    }
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
     
-    delete game;
+    if(game != nullptr) delete game;
+    if(startmenu != nullptr) delete startmenu;
+    if(settings != nullptr) delete settings;
+
     glfwTerminate();
     return 0;
 }

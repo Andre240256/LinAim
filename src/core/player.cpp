@@ -23,3 +23,8 @@ void Player::updatePos(GLFWwindow * window, float deltaTime)
         this->Pos -= distance * glm::normalize(glm::cross(this->Front, Yaxis));
     }
 }
+
+void Player::setSensibility(float sensibility)
+{
+    this->sensitivity = sensibility;
+}

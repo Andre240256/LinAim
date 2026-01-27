@@ -10,19 +10,20 @@
 #include "imgui_impl_opengl3.h"
 
 #include "core/configUI.hpp"
-#include "stateDefinitions.hpp"
 
-class StateStartMenu{
+#include "states/stateDefinitions.hpp"
+
+class StateSettings{
 public:
-    StateStartMenu(GLFWwindow * window);
+    float sensibility;
 
-    stateApp run();
+    StateSettings(GLFWwindow * window);
+
+    stateApp run(stateApp lastState);
+
 private:
     GLFWwindow * window;
     bool escPressedLastFrame;
 
-    ImVec2 buttonNormalSize;
-    ImVec2 buttonBigSize;
-
-    stateApp processInput();
+    stateApp processInput(stateApp lastState);
 };

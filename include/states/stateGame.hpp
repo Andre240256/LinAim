@@ -44,6 +44,8 @@ private:
     float deltaTime;
     float lastFrame;
 
+    bool escPressedLastFrame;
+
     glm::mat4 view;
     glm::mat4 projection;
 

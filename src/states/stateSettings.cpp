@@ -33,9 +33,35 @@ stateApp StateSettings::run(stateApp lastState)
         {
             float windowWidth = ImGui::GetWindowSize().x;
             float windowHeight = ImGui::GetWindowSize().y;
+            float textSize = ImGui::CalcTextSize("Sensitivity").x;
 
-            ImGui::SliderFloat("sensibility", &this->sensibility , 0.0f, 10.0f);
+            float sliderSize = 900.0f;
+            float stepX = (windowWidth - textSize) * 0.5f;
+            float stepY = windowHeight / 6;
 
+            ImGui::SetCursorPosX(stepX);
+            ImGui::SetCursorPosY(stepY);
+            ImGui::Text("Sensitivity");
+
+            ImGui::Spacing();
+
+            stepX = (windowWidth - sliderSize) * 0.5f;
+            ImGui::SetCursorPosX(stepX);
+
+            ImGui::PushItemWidth(sliderSize);
+            ImGui::SliderFloat("", &this->sensibility , 0.0f, 10.0f);
+            ImGui::PopItemWidth();
+
+            ImVec2 buttonNormalSize = {200.0f, 40.0f};
+            stepX = (windowWidth - buttonNormalSize.x) * 0.5f;
+
+            ImGui::SetCursorPosX(stepX);
+            ImGui::SetCursorPosY(windowHeight * 5.0f / 6.0f - buttonNormalSize.y * 0.5f);
+
+            if(ImGui::Button("quit", buttonNormalSize)){
+                glfwSetWindowShouldClose(window, true);
+                currentState = stateApp::EXIT;
+            }
         }
         ImGui::End();
         if (configUI::MainFont) ImGui::PopFont();

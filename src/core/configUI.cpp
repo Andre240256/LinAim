@@ -1,6 +1,8 @@
 #include "core/configUI.hpp"
 
+SettingData configUI::data;
 ImFont* configUI::MainFont = nullptr;
+const std::string configPath = "assets/data/config.json";
 
 ImGuiWindowFlags configUI::windowFlags = (
         ImGuiWindowFlags_NoDecoration |
@@ -30,4 +32,52 @@ void configUI::setup()
     style.Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     
     ImGui::StyleColorsDark();
+}
+
+void configUI::saveSettings()
+{
+    fs::path path(configPath);
+    fs::path dir = path.parent_path();
+
+    if(!fs::exists(dir)){
+        try{
+            fs::create_directories(dir);
+        }
+        catch (const fs::filesystem_error& e){
+            std::cerr << "Erro, nao foi possivel criar a pasta: " << 
+            e.what() << std::endl;
+            return;
+        }
+    }
+
+    json j = data;
+    std::ofstream file(configPath);
+
+    if(file.is_open()){
+        file << j.dump(4);
+        file.close();
+    }
+    else {
+        std::cerr << "Erro, falha ao abrir arquivo para a escrita." << std::endl;
+    }
+}
+
+void configUI::loadSettings()
+{
+    if(!fs::exists(configPath)){
+        saveSettings();
+    }
+
+    std::ifstream file(configPath);
+
+    if(file.is_open()){
+        try{
+            json j;
+            file >> j;
+            data = j.get<SettingData>();
+        }
+        catch (const json::parse_error& e){
+            std::cerr << "Erro Json: arquivo corrompido: " << e.what() << std::endl;
+        }
+    }
 }

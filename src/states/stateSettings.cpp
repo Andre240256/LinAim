@@ -4,11 +4,12 @@ StateSettings::StateSettings(GLFWwindow * window)
 {
     this->window = window;
     this->escPressedLastFrame = false;
-    this->sensibility = 0.3f;
 }
 
 stateApp StateSettings::run(stateApp lastState)
 {
+    this->sensitivity = configUI::data.sensitivity;
+
     stateApp currentState = stateApp::SETTINGS;
     while(!glfwWindowShouldClose(this->window) && currentState == stateApp::SETTINGS)
     {
@@ -49,14 +50,24 @@ stateApp StateSettings::run(stateApp lastState)
             ImGui::SetCursorPosX(stepX);
 
             ImGui::PushItemWidth(sliderSize);
-            ImGui::SliderFloat("", &this->sensibility , 0.0f, 10.0f);
+            ImGui::SliderFloat("", &this->sensitivity , 0.0f, 10.0f);
             ImGui::PopItemWidth();
 
             ImVec2 buttonNormalSize = {200.0f, 40.0f};
-            stepX = (windowWidth - buttonNormalSize.x) * 0.5f;
-
-            ImGui::SetCursorPosX(stepX);
             ImGui::SetCursorPosY(windowHeight * 5.0f / 6.0f - buttonNormalSize.y * 0.5f);
+            
+            stepX = (windowWidth) / 3 - (buttonNormalSize.x) * 0.5f;
+            ImGui::SetCursorPosX(stepX);
+
+            if(ImGui::Button("aply", buttonNormalSize)){
+                configUI::data.sensitivity = this->sensitivity;
+                std::cout << "configuracoes alteradas" << std::endl;
+                configUI::saveSettings();
+            }
+            ImGui::SameLine();
+
+            stepX += (windowWidth) / 3;
+            ImGui::SetCursorPosX(stepX);
 
             if(ImGui::Button("quit", buttonNormalSize)){
                 glfwSetWindowShouldClose(window, true);

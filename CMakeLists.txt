@@ -5,6 +5,7 @@ project(LinAim)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(IMGUI_DIR "vendor/imgui")
+set(JSON_DIR "vendor/json")
 
 
 find_package(glfw3 3.3 REQUIRED)
@@ -39,6 +40,9 @@ target_link_libraries(LinAim
 
 target_include_directories(LinAim PRIVATE 
     ${IMGUI_DIR}
+)
+target_include_directories(LinAim PRIVATE
+    ${JSON_DIR}
 )
 
 file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})

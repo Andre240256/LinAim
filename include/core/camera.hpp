@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#include "configUI.hpp"
+
 class Camera
 {
 public:

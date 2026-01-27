@@ -38,6 +38,7 @@ void scroll_callback(GLFWwindow * window, double xoffset, double yoffset);
 void mouse_button_callback(GLFWwindow * window, int button, int actions, int mods);
 
 unsigned int Shader::currentProgramID = 0;
+
 StateGame * game = nullptr;
 StateStartMenu * startmenu = nullptr;
 StateSettings * settings = nullptr;
@@ -74,6 +75,7 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
+    configUI::loadSettings();
     configUI::setup();
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -118,7 +120,6 @@ int main()
                     settings = new StateSettings(window);
                 }
                 currentState = settings->run(lastState);
-                game->player.setSensibility(settings->sensibility); 
                 break;
                 
             case stateApp::EXIT:

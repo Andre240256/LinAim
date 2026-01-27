@@ -15,7 +15,7 @@
 
 class StateSettings{
 public:
-    float sensibility;
+    float sensitivity;
 
     StateSettings(GLFWwindow * window);
 

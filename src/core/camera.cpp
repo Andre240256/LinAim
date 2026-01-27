@@ -10,7 +10,7 @@ Camera::Camera(glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp)
     this->Front = cameraFront;
     this->Up = cameraUp;
 
-    this->sensitivity = 0.05f;
+    this->sensitivity = configUI::data.sensitivity;
     this->velocity = 4.0f;
 
     this->lastX = 640.0f;

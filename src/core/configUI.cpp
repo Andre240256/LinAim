@@ -65,19 +65,26 @@ void configUI::saveSettings()
 void configUI::loadSettings()
 {
     if(!fs::exists(configPath)){
+        std::cout << "[UIConfig] Arquivo nao encontrado. Criando padrao..." << std::endl;
         saveSettings();
+        return;
     }
 
     std::ifstream file(configPath);
+    data = SettingData();
 
     if(file.is_open()){
         try{
             json j;
             file >> j;
             data = j.get<SettingData>();
+            saveSettings();
         }
         catch (const json::parse_error& e){
-            std::cerr << "Erro Json: arquivo corrompido: " << e.what() << std::endl;
+            file.close();
+            fs::remove(configPath);
+            data = SettingData();
+            saveSettings();
         }
     }
 }

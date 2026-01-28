@@ -19,7 +19,7 @@ struct SettingData {
     bool strechedRes = false;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SettingData, sensitivity, strechedRes);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SettingData, sensitivity, strechedRes);
 
 class configUI{
 public:

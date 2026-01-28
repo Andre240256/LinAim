@@ -4,7 +4,7 @@ Camera::Camera(glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp)
 {
     this->yaw = -90.0f, this->pitch = 0.0f;
 
-    this->zoom = 45.0f;
+    this->fov = 71.1f;
 
     this->Pos = cameraPos;
     this->Front = cameraFront;
@@ -60,8 +60,10 @@ void Camera::updateDir(GLFWwindow * window, double xposIn, double yposIn)
 
     lastX = xpos, lastY = ypos;
 
-    yaw += xoffset * this->sensitivity;
-    pitch += yoffset * this->sensitivity;
+    const float VALORANT_SCALE = 0.07f;
+
+    yaw += xoffset * this->sensitivity * VALORANT_SCALE;
+    pitch += yoffset * this->sensitivity * VALORANT_SCALE;
 
     if(pitch > 89.0f)
         pitch = 89.0f;
@@ -74,15 +76,6 @@ void Camera::updateDir(GLFWwindow * window, double xposIn, double yposIn)
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
     this->Front = glm::normalize(direction);
-}
-
-void Camera::updateZoom(double yoffset)
-{
-    this->zoom -= static_cast<float>(yoffset);
-    if(zoom < 1.0f)
-        zoom = 1.0f;
-    if(zoom > 45.0f)
-        zoom = 45.0f;
 }
 
 glm::mat4 Camera::getViewMat()

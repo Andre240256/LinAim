@@ -29,12 +29,18 @@ struct GridSlot{
     GridSlot(glm::vec3 pos, bool occupied = false);
 };
 
+struct PlayerGameStats{
+    unsigned int totalShots = 0;
+    unsigned int targetsHit = 0;
+};
+
 class StateGame{
 public:
     std::vector<Bullet *> bullets;
     std::vector<Ball *> balls;
 
     Player player;
+    PlayerGameStats playerStats;
     SkyBox skybox;
     Crosshair crosshair;
     Grid grid;
@@ -46,6 +52,7 @@ public:
 
     void freeGridSlot(int index);
     void setWindow(GLFWwindow * window);
+    void shoot();
 
 private:
     static std::mt19937& getGenerator();
@@ -59,8 +66,6 @@ private:
     glm::mat4 projection;
 
     GLFWwindow * window;
-    int width, height;
-    float aspect;
     unsigned int uboMatrices;
 
     std::vector<GridSlot> ballGrid;

@@ -38,9 +38,14 @@ stateApp StateGame::run()
 {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    glm::mat4 model;
     glm::mat4 view;
     glm::mat4 projection;
+
+    int height, width;
+    glfwGetWindowSize(this->window, &width, &height);
+    float aspect = static_cast<float>(width) / static_cast<float>(height);
+    projection = glm::perspective(glm::radians(player.fov), aspect, 0.1f, 100.0f);
+
 
     this->player.setSensibility(configUI::data.sensitivity);
     this->player.lastX = 640.0f;
@@ -61,7 +66,6 @@ stateApp StateGame::run()
         currentState = processInput();
 
         view = player.getViewMat();
-        projection = glm::perspective(player.zoom, aspect, 0.1f, 100.0f);
 
         glBindBuffer(GL_UNIFORM_BUFFER, this->uboMatrices);
         glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view));
@@ -83,11 +87,13 @@ stateApp StateGame::run()
                 ball->draw();
             else{
                 freeGridSlot(ball->currentSlot);
-                ball->active = true;
                 int randomIndex = getRandomFreeSlot();
+                ball->active = true;
                 ball->currentSlot = randomIndex;
-                this->ballGrid[randomIndex].occupied = true;
                 ball->pos = this->ballGrid[randomIndex].pos;
+                this->ballGrid[randomIndex].occupied = true;
+                this->playerStats.targetsHit++;
+                std::cout << "Total Targets hit: " << this->playerStats.targetsHit << std::endl;
             }
         }
 
@@ -120,8 +126,6 @@ stateApp StateGame::run()
 void StateGame::setWindow(GLFWwindow * window)
 {
     this->window = window;
-    glfwGetWindowSize(this->window, &this->width, &this->height);
-    this->aspect = static_cast<float>(this->width) / static_cast<float>(this->height);
 }
 
 void StateGame::freeGridSlot(int index)
@@ -129,6 +133,14 @@ void StateGame::freeGridSlot(int index)
     if(index >= 0 && index < ballGrid.size()){
         ballGrid[index].occupied = false;
     }
+}
+
+void StateGame::shoot()
+{
+    bullets.push_back(new Bullet(this->player.Pos + this->player.Front * 1.0f, this->player.Front));
+    this->playerStats.totalShots++;
+    std::cout << "Total shots: " << this->playerStats.totalShots << std::endl;
+    fflush(stdout);
 }
 
 //Private Functions
@@ -236,6 +248,8 @@ int StateGame::getRandomFreeSlot()
     return freeIndices[randomIndex];
 }
 
+//Depricated function not in use, we use *getRandomFreeSlot* 
+//and then get the position of that random slot in the grid.
 glm::vec3 StateGame::getRandomBallPosition() const
 {
     bool validPos = false;

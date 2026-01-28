@@ -34,7 +34,6 @@ const unsigned int HEIGHT = 720;
 
 void framebuffer_size_callback(GLFWwindow * window, int width, int size);
 void mouse_callback(GLFWwindow * window, double xpos, double ypos);
-void scroll_callback(GLFWwindow * window, double xoffset, double yoffset);
 void mouse_button_callback(GLFWwindow * window, int button, int actions, int mods);
 
 unsigned int Shader::currentProgramID = 0;
@@ -80,7 +79,6 @@ int main()
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     glEnable(GL_DEPTH_TEST);
@@ -153,12 +151,6 @@ void mouse_callback(GLFWwindow * window, double xposIn, double yposIn)
         game->player.updateDir(window, xposIn, yposIn);
 }
 
-void scroll_callback(GLFWwindow * window, double xoffset, double yoffset)
-{
-    if(game != nullptr)
-        game->player.updateZoom(yoffset);
-}
-
 void mouse_button_callback(GLFWwindow * window, int button, int action, int mods)
 {
     if(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL){
@@ -171,6 +163,6 @@ void mouse_button_callback(GLFWwindow * window, int button, int action, int mods
 
     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && game != nullptr)
     {
-       game->bullets.push_back(new Bullet(game->player.Pos + game->player.Front * 1.0f, game->player.Front));
+       game->shoot();
     }
 }

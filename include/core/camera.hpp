@@ -26,7 +26,7 @@ public:
 
     float yaw;
     float pitch;
-    float zoom;
+    float fov;
 
     float lastX, lastY;
     bool firstMouse;

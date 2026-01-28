@@ -24,6 +24,8 @@ public:
 private:
     GLFWwindow * window;
     bool escPressedLastFrame;
+    bool enterPressedLastFrame;
 
     stateApp processInput(stateApp lastState);
+    int applySettingsChanges();
 };

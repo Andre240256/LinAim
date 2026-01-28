@@ -4,6 +4,7 @@ StateSettings::StateSettings(GLFWwindow * window)
 {
     this->window = window;
     this->escPressedLastFrame = false;
+    this->enterPressedLastFrame = false;
 }
 
 stateApp StateSettings::run(stateApp lastState)
@@ -36,22 +37,39 @@ stateApp StateSettings::run(stateApp lastState)
             float windowHeight = ImGui::GetWindowSize().y;
             float textSize = ImGui::CalcTextSize("Sensitivity").x;
 
-            float sliderSize = 900.0f;
-            float stepX = (windowWidth - textSize) * 0.5f;
-            float stepY = windowHeight / 6;
+            float boxSize = 100.0f;
+            float sliderSize = windowWidth - boxSize - windowWidth /6.0f;
+            float sliderCenter = windowWidth - windowWidth / 18.0f - sliderSize / 2.0f;
+            float boxCenter = windowWidth / 12.0f + boxSize * 0.5f;
 
+            float stepX = sliderCenter - textSize * 0.5f;
+            float stepY = windowHeight / 6;
+            
             ImGui::SetCursorPosX(stepX);
             ImGui::SetCursorPosY(stepY);
             ImGui::Text("Sensitivity");
-
+            
             ImGui::Spacing();
-
-            stepX = (windowWidth - sliderSize) * 0.5f;
+            
+            stepX = sliderCenter - sliderSize * 0.5f;
             ImGui::SetCursorPosX(stepX);
-
             ImGui::PushItemWidth(sliderSize);
-            ImGui::SliderFloat("", &this->sensitivity , 0.0f, 10.0f);
+            ImGui::SliderFloat("##sens_slider", &this->sensitivity , 0.0001f, 5.0f);
             ImGui::PopItemWidth();
+
+            ImGui::SameLine();
+
+            stepX = boxCenter - boxSize * 0.5f;
+            ImGui::SetCursorPosX(stepX);
+            ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.0f));
+            ImGui::PushItemWidth(boxSize);
+            if(ImGui::InputFloat("##sens_input", &this->sensitivity, 0.0f, 0.0f, "%.3f")){
+                if(this->sensitivity < 0.0001f) this->sensitivity = 0.0001f;
+                if(this->sensitivity > 5.0f) this->sensitivity = 5.0f;
+            }
+
+            ImGui::PopItemWidth();
+            ImGui::PopStyleColor();
 
             ImVec2 buttonNormalSize = {200.0f, 40.0f};
             ImGui::SetCursorPosY(windowHeight * 5.0f / 6.0f - buttonNormalSize.y * 0.5f);
@@ -60,9 +78,7 @@ stateApp StateSettings::run(stateApp lastState)
             ImGui::SetCursorPosX(stepX);
 
             if(ImGui::Button("aply", buttonNormalSize)){
-                configUI::data.sensitivity = this->sensitivity;
-                std::cout << "configuracoes alteradas" << std::endl;
-                configUI::saveSettings();
+                applySettingsChanges();
             }
             ImGui::SameLine();
 
@@ -86,6 +102,15 @@ stateApp StateSettings::run(stateApp lastState)
     return currentState;
 }
 
+int StateSettings::applySettingsChanges()
+{
+    configUI::data.sensitivity = this->sensitivity;
+    std::cout << "configuracoes alteradas" << std::endl;
+    configUI::saveSettings();
+
+    return 1;
+}
+
 stateApp StateSettings::processInput(stateApp lastState)
 {
     bool escPressed = glfwGetKey(this->window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
@@ -94,6 +119,14 @@ stateApp StateSettings::processInput(stateApp lastState)
         return lastState;
     }
     escPressedLastFrame = escPressed;
+
+    bool enterPressed = glfwGetKey(this->window, GLFW_KEY_ENTER) == GLFW_PRESS;
+    if(enterPressed && !enterPressedLastFrame){
+        enterPressedLastFrame = true;
+        applySettingsChanges();
+        return stateApp::SETTINGS;
+    }
+    enterPressedLastFrame = enterPressed;
 
     return stateApp::SETTINGS;
 }

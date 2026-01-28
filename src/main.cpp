@@ -100,7 +100,6 @@ int main()
                     game->setWindow(window);
                 }
                 currentState = game->run();
-
                 if(currentState == stateApp::SETTINGS)
                     lastState = stateApp::GAME;
                 break;
@@ -110,7 +109,6 @@ int main()
                     startmenu = new StateStartMenu(window);
                 }
                 currentState = startmenu->run();
-
                 if(currentState == stateApp::SETTINGS)
                     lastState = stateApp::START_MENU;
                 break;

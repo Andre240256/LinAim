@@ -22,6 +22,13 @@
 
 #include "states/stateDefinitions.hpp"
 
+struct GridSlot{
+    glm::vec3 pos;
+    bool occupied;
+
+    GridSlot(glm::vec3 pos, bool occupied = false);
+};
+
 class StateGame{
 public:
     std::vector<Bullet *> bullets;
@@ -36,6 +43,8 @@ public:
     ~StateGame();
 
     stateApp run();
+
+    void freeGridSlot(int index);
     void setWindow(GLFWwindow * window);
 
 private:
@@ -54,10 +63,17 @@ private:
     float aspect;
     unsigned int uboMatrices;
 
+    std::vector<GridSlot> ballGrid;
+    float gridSpacing;
+    int gridRows;
+    int gridCols; 
+
     void deltaTimeCalc();
     stateApp processInput();
     
     bool setBallsVector();
+    void setBallgrid();
+    int getRandomFreeSlot();
 
     void loadMatricesUBO(int gateway);
 

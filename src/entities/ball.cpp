@@ -9,12 +9,13 @@ void Ball::initShader()
     }
 }
 
-Ball::Ball(glm::vec3 startPos, int xSegments, int ySegments)
+Ball::Ball(glm::vec3 startPos, int slotIndex, int xSegments, int ySegments)
 {
     this->pos = startPos;
     this->scale = glm::vec3(1.0f);
     this->ballColor = glm::vec3(0.1843, 0.1843, 0.9255);
     this->active = true;
+    this->currentSlot = slotIndex;
     shader->bindUniformBlock(0, "Matrices");
     setupBall(xSegments, ySegments);
 }

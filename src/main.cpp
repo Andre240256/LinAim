@@ -29,9 +29,6 @@
 #include "states/stateStartMenu.hpp"
 #include "states/stateSettings.hpp"
 
-const unsigned int WIDTH = 1280;
-const unsigned int HEIGHT = 720;
-
 void framebuffer_size_callback(GLFWwindow * window, int width, int size);
 void mouse_callback(GLFWwindow * window, double xpos, double ypos);
 void mouse_button_callback(GLFWwindow * window, int button, int actions, int mods);
@@ -53,7 +50,16 @@ int main()
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     #endif
 
-    GLFWwindow * window = glfwCreateWindow(WIDTH, HEIGHT, "LinAim", NULL, NULL);
+    GLFWmonitor * monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode * mode = glfwGetVideoMode(monitor);
+
+    glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+    glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+    glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+    glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+    int width = mode->width, height = mode->height;
+    GLFWwindow * window = glfwCreateWindow(width, height, "LinAim", monitor, NULL);
     if(!window)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -82,7 +88,7 @@ int main()
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
     glEnable(GL_DEPTH_TEST);
-    glViewport(0, 0, WIDTH, HEIGHT);
+    glViewport(0, 0, width, height);
 
     stateApp currentState = stateApp::START_MENU;
     stateApp lastState = stateApp::START_MENU;

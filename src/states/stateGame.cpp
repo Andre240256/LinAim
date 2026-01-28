@@ -43,7 +43,11 @@ stateApp StateGame::run()
 
     int height, width;
     glfwGetWindowSize(this->window, &width, &height);
-    float aspect = static_cast<float>(width) / static_cast<float>(height);
+    float aspect;
+    if(configUI::data.strechedRes)
+        aspect = 4.0f / 3.0f;
+    else
+        aspect = static_cast<float>(width) / static_cast<float>(height);
     projection = glm::perspective(glm::radians(player.fov), aspect, 0.1f, 100.0f);
 
 

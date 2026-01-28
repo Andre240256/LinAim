@@ -16,9 +16,10 @@ namespace fs = std::filesystem;
 
 struct SettingData {
     float sensitivity = 1.0f;
+    bool strechedRes = false;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SettingData, sensitivity);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(SettingData, sensitivity, strechedRes);
 
 class configUI{
 public:

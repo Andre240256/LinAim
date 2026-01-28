@@ -7,7 +7,7 @@ pos(pos), occupied(occupied)
 
 //Constructor
 StateGame::StateGame() :
-skybox("assets/textures/skyCubeMap/"), player(glm::vec3(0.0f, 1.5f, 10.0f))
+skybox("assets/textures/skyCubeMap/"), player(glm::vec3(0.0f, 3.0f, 10.0f))
 {
     Ball::initShader();
     Grid::initShader();
@@ -41,19 +41,17 @@ stateApp StateGame::run()
     glm::mat4 view;
     glm::mat4 projection;
 
-    int height, width;
-    glfwGetWindowSize(this->window, &width, &height);
+    int width = configUI::data.currentResolution.width;
+    int height = configUI::data.currentResolution.height;
     float aspect;
-    if(configUI::data.strechedRes)
-        aspect = 4.0f / 3.0f;
-    else
-        aspect = static_cast<float>(width) / static_cast<float>(height);
-    projection = glm::perspective(glm::radians(player.fov), aspect, 0.1f, 100.0f);
+    aspect = static_cast<float>(width) / static_cast<float>(height);
+    float vFovRad = 2.0f * std::atan(std::tan(glm::radians(player.fov) / 2.0f) / aspect);
+    projection = glm::perspective(vFovRad, aspect, 0.1f, 100.0f);
 
 
     this->player.setSensibility(configUI::data.sensitivity);
-    this->player.lastX = 640.0f;
-    this->player.lastY = 360.0f;
+    this->player.lastX = static_cast<float>(width) / 2.0f;
+    this->player.lastY = static_cast<float>(height) / 2.0f;
     this->player.firstMouse = true;
 
     this->deltaTime = 0.0f;

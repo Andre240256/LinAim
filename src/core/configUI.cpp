@@ -2,6 +2,9 @@
 
 SettingData configUI::data;
 ImFont* configUI::MainFont = nullptr;
+GLFWwindow * configUI::window = nullptr;
+std::vector<Resolution> configUI::availableResolutions;
+int configUI::currentResolutionIndex;
 const std::string configPath = "assets/data/config.json";
 
 ImGuiWindowFlags configUI::windowFlags = (
@@ -32,6 +35,35 @@ void configUI::setup()
     style.Colors[ImGuiCol_Text] = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
     
     ImGui::StyleColorsDark();
+
+    loadResolutions();
+}
+
+void configUI::loadResolutions()
+{
+    availableResolutions.clear();
+
+    availableResolutions = {
+        {1280, 960, "1280 x 960 (4:3)"},
+        {1280, 1024 , "1280 x 1024 (5:4)"},
+        {1680, 1000, "1680 x 1000 (16:10)"},
+        {1920, 1080, "1920 x 1080 (16:9)"}
+    };
+
+    bool validResolution = false;
+    for(int i = 0; i < availableResolutions.size(); i++){
+        if(configUI::data.currentResolution.width == availableResolutions[i].width &&
+           configUI::data.currentResolution.height == availableResolutions[i].height){
+                configUI::currentResolutionIndex = i;
+                validResolution = true;
+            }
+    }
+
+    if(!validResolution){
+        configUI::currentResolutionIndex = 3;
+        configUI::data.currentResolution = availableResolutions[configUI::currentResolutionIndex];
+        glfwSetWindowSize(configUI::window, configUI::data.currentResolution.width, configUI::data.currentResolution.width);
+    }
 }
 
 void configUI::saveSettings()

@@ -16,6 +16,8 @@
 class StateSettings{
 public:
     float sensitivity;
+    Resolution currentResolution;
+    int currentResolutionIndex;
 
     StateSettings(GLFWwindow * window);
 

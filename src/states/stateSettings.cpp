@@ -10,6 +10,8 @@ StateSettings::StateSettings(GLFWwindow * window)
 stateApp StateSettings::run(stateApp lastState)
 {
     this->sensitivity = configUI::data.sensitivity;
+    this->currentResolution = configUI::data.currentResolution;
+    this->currentResolutionIndex = configUI::currentResolutionIndex;
 
     stateApp currentState = stateApp::SETTINGS;
     while(!glfwWindowShouldClose(this->window) && currentState == stateApp::SETTINGS)
@@ -71,6 +73,34 @@ stateApp StateSettings::run(stateApp lastState)
             ImGui::PopItemWidth();
             ImGui::PopStyleColor();
 
+            ImGui::Dummy(ImVec2(0.0f, 40.0f));
+
+            textSize = ImGui::CalcTextSize("Resolution").x;
+            stepX = sliderCenter - textSize * 0.5f;
+            ImGui::SetCursorPosX(stepX);
+            ImGui::Text("Resolution");
+
+            stepX = sliderCenter - sliderSize * 0.5;
+            ImGui::SetCursorPosX(stepX);
+            ImGui::PushItemWidth(sliderSize);
+            const char * previewValue = this->currentResolution.label.c_str();
+
+            if(ImGui::BeginCombo("##Resolution_combo", previewValue)){
+                for(int n = 0; n < configUI::availableResolutions.size(); n++){
+                    const bool isSelected = (this->currentResolutionIndex == n);
+
+                    if(ImGui::Selectable(configUI::availableResolutions[n].label.c_str(), isSelected)){
+                        this->currentResolutionIndex = n;
+                        this->currentResolution = configUI::availableResolutions[n];
+                    }
+                    if (isSelected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+
+            ImGui::PopItemWidth();
+
             ImVec2 buttonNormalSize = {200.0f, 40.0f};
             ImGui::SetCursorPosY(windowHeight * 5.0f / 6.0f - buttonNormalSize.y * 0.5f);
             
@@ -105,9 +135,44 @@ stateApp StateSettings::run(stateApp lastState)
 int StateSettings::applySettingsChanges()
 {
     configUI::data.sensitivity = this->sensitivity;
+    configUI::currentResolutionIndex = this->currentResolutionIndex;
+    configUI::data.currentResolution = this->currentResolution;
+    
     std::cout << "configuracoes alteradas" << std::endl;
-    configUI::saveSettings();
 
+    GLFWmonitor * monitor = glfwGetPrimaryMonitor();
+    int count;
+    const GLFWvidmode * modes = glfwGetVideoModes(monitor, &count);
+
+   int bestWidth = 0;
+   int bestHeight = 0;
+   int maxRefreshRate = 0;
+
+    for(int i =0; i < count; i++){
+        if(modes[i].refreshRate > maxRefreshRate){
+            maxRefreshRate = modes[i].refreshRate;
+            bestWidth = modes[i].width;
+            bestHeight = modes[i].height;
+        }
+        else if(modes[i].refreshRate == maxRefreshRate){
+            if(modes[i].width > bestWidth){
+                bestWidth = modes[i].width;
+                bestHeight = modes[i].height;
+            }
+        }
+    }
+
+    std::cout << "Monitor forçado para NATIVO para garantir Hz: " 
+              << bestWidth << "x" << bestHeight 
+              << " @ " << maxRefreshRate << "Hz" << std::endl;
+
+    glfwSetWindowMonitor(window, monitor, 0, 0, 
+                        bestWidth, bestHeight, 
+                        maxRefreshRate);
+    glViewport(0, 0, bestWidth, bestHeight);
+    glfwSwapInterval(1);
+    
+    configUI::saveSettings();
     return 1;
 }
 

@@ -50,15 +50,32 @@ int main()
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     #endif
 
+    configUI::loadSettings();
+
+    int count;
     GLFWmonitor * monitor = glfwGetPrimaryMonitor();
-    const GLFWvidmode * mode = glfwGetVideoMode(monitor);
+    const GLFWvidmode * modes = glfwGetVideoModes(monitor, &count);
 
-    glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-    glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-    glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-    glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+    int bestIndex = 0;
 
-    int width = mode->width, height = mode->height;
+    for(int i = 0; i < count; i++){
+        if(modes[i].refreshRate > modes[bestIndex].refreshRate){
+            bestIndex = i;
+        }
+        else if(modes[i].refreshRate == modes[bestIndex].refreshRate){
+            if(modes[i].width > modes[bestIndex].width)
+                bestIndex = i;
+        }
+    }
+
+    glfwWindowHint(GLFW_RED_BITS, modes[bestIndex].redBits);
+    glfwWindowHint(GLFW_GREEN_BITS, modes[bestIndex].greenBits);
+    glfwWindowHint(GLFW_BLUE_BITS, modes[bestIndex].blueBits);
+    glfwWindowHint(GLFW_REFRESH_RATE, modes[bestIndex].refreshRate);
+
+    int width = modes[bestIndex].width;
+    int height = modes[bestIndex].height;
+    std::cout << width << " : " << height << std::endl;
     GLFWwindow * window = glfwCreateWindow(width, height, "LinAim", monitor, NULL);
     if(!window)
     {
@@ -80,7 +97,7 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    configUI::loadSettings();
+    configUI::window = window;
     configUI::setup();
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);

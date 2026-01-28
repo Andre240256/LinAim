@@ -4,7 +4,7 @@ Camera::Camera(glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp)
 {
     this->yaw = -90.0f, this->pitch = 0.0f;
 
-    this->fov = 71.1f;
+    this->fov = 103.0f;
 
     this->Pos = cameraPos;
     this->Front = cameraFront;

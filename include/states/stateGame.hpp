@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 #include <random>
+#include <cmath>
 
 #include "core/player.hpp"
 #include "core/skyBox.hpp"

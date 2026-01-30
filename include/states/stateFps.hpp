@@ -13,9 +13,10 @@
 #include <random>
 #include <cmath>
 
+#include "core/game.hpp"
 #include "core/player.hpp"
-#include "core/skyBox.hpp"
 
+#include "entities/skyBox.hpp"
 #include "entities/ball.hpp"
 #include "entities/bullet.hpp"
 #include "entities/crosshair.hpp"
@@ -35,8 +36,10 @@ struct PlayerGameStats{
     unsigned int targetsHit = 0;
 };
 
-class StateGame{
+class StateFps{
 public:
+    Game * game;
+
     std::vector<Bullet *> bullets;
     std::vector<Ball *> balls;
 
@@ -46,14 +49,14 @@ public:
     Crosshair crosshair;
     Grid grid;
 
-    StateGame();
-    ~StateGame();
+    StateFps(Game * ptrMaster);
+    ~StateFps();
 
-    stateApp run();
+    void run();
 
     void freeGridSlot(int index);
-    void setWindow(GLFWwindow * window);
     void shoot();
+    void processKeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods);
 
 private:
     static std::mt19937& getGenerator();
@@ -66,7 +69,6 @@ private:
     glm::mat4 view;
     glm::mat4 projection;
 
-    GLFWwindow * window;
     unsigned int uboMatrices;
 
     std::vector<GridSlot> ballGrid;
@@ -75,7 +77,7 @@ private:
     int gridCols; 
 
     void deltaTimeCalc();
-    stateApp processInput();
+    void processInput();
     
     bool setBallsVector();
     void setBallgrid();

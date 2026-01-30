@@ -1,27 +1,25 @@
 #include "states/stateSettings.hpp"
 
-StateSettings::StateSettings(GLFWwindow * window)
+StateSettings::StateSettings(Game * ptrMaster) : game(ptrMaster)
 {
-    this->window = window;
     this->escPressedLastFrame = false;
     this->enterPressedLastFrame = false;
 }
 
-stateApp StateSettings::run(stateApp lastState)
+void StateSettings::run()
 {
-    this->sensitivity = configUI::data.sensitivity;
-    this->currentResolution = configUI::data.currentResolution;
-    this->currentResolutionIndex = configUI::currentResolutionIndex;
+    this->sensitivity = this->game->getSettings().sensitivity;
+    this->currentResolution = this->game->getSettings().currentResolution;
+    this->currentResolutionIndex = this->game->getResolutionIndex();
 
-    stateApp currentState = stateApp::SETTINGS;
-    while(!glfwWindowShouldClose(this->window) && currentState == stateApp::SETTINGS)
+    while(!glfwWindowShouldClose(this->game->getWindow()) && this->game->currentState == stateApp::SETTINGS)
     {
         glClearColor(0.3f, 0.5f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         glfwPollEvents();
 
-        currentState = processInput(lastState);
+        processInput();
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -31,9 +29,9 @@ stateApp StateSettings::run(stateApp lastState)
         ImGui::SetNextWindowPos(viewport->WorkPos);
         ImGui::SetNextWindowSize(viewport->WorkSize);
 
-        if(configUI::MainFont) ImGui::PushFont(configUI::MainFont);
+        if(this->game->getFont() != nullptr) ImGui::PushFont(this->game->getFont());
 
-        ImGui::Begin("settings menu", nullptr, configUI::windowFlags);
+        ImGui::Begin("settings menu", nullptr, this->game->getWindowFlagsDefault());
         {
             float windowWidth = ImGui::GetWindowSize().x;
             float windowHeight = ImGui::GetWindowSize().y;
@@ -85,13 +83,14 @@ stateApp StateSettings::run(stateApp lastState)
             ImGui::PushItemWidth(sliderSize);
             const char * previewValue = this->currentResolution.label.c_str();
 
+            std::vector <Resolution>& resolutionsList = this->game->getAvailableResolutions();
             if(ImGui::BeginCombo("##Resolution_combo", previewValue)){
-                for(int n = 0; n < configUI::availableResolutions.size(); n++){
+                for(int n = 0; n < resolutionsList.size(); n++){
                     const bool isSelected = (this->currentResolutionIndex == n);
 
-                    if(ImGui::Selectable(configUI::availableResolutions[n].label.c_str(), isSelected)){
+                    if(ImGui::Selectable(resolutionsList[n].label.c_str(), isSelected)){
                         this->currentResolutionIndex = n;
-                        this->currentResolution = configUI::availableResolutions[n];
+                        this->currentResolution = resolutionsList[n];
                     }
                     if (isSelected)
                         ImGui::SetItemDefaultFocus();
@@ -108,7 +107,7 @@ stateApp StateSettings::run(stateApp lastState)
             ImGui::SetCursorPosX(stepX);
 
             if(ImGui::Button("aply", buttonNormalSize)){
-                applySettingsChanges();
+                game->applySettingChanges(this->sensitivity, this->currentResolutionIndex);
             }
             ImGui::SameLine();
 
@@ -116,82 +115,46 @@ stateApp StateSettings::run(stateApp lastState)
             ImGui::SetCursorPosX(stepX);
 
             if(ImGui::Button("quit", buttonNormalSize)){
-                glfwSetWindowShouldClose(window, true);
-                currentState = stateApp::EXIT;
+                glfwSetWindowShouldClose(this->game->getWindow(), true);
+                this->game->currentState = stateApp::EXIT;
             }
         }
         ImGui::End();
-        if (configUI::MainFont) ImGui::PopFont();
+        if (this->game->getFont()) ImGui::PopFont();
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwSwapBuffers(this->window);
+        glfwSwapBuffers(this->game->getWindow());
     }
 
-    if(glfwWindowShouldClose(window)) currentState = stateApp::EXIT;
-    return currentState;
+    if(glfwWindowShouldClose(this->game->getWindow())) this->game->currentState = stateApp::EXIT;
 }
 
-int StateSettings::applySettingsChanges()
+void StateSettings::processKeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods)
 {
-    configUI::data.sensitivity = this->sensitivity;
-    configUI::currentResolutionIndex = this->currentResolutionIndex;
-    configUI::data.currentResolution = this->currentResolution;
-    
-    std::cout << "configuracoes alteradas" << std::endl;
-
-    GLFWmonitor * monitor = glfwGetPrimaryMonitor();
-    int count;
-    const GLFWvidmode * modes = glfwGetVideoModes(monitor, &count);
-
-   int bestWidth = 0;
-   int bestHeight = 0;
-   int maxRefreshRate = 0;
-
-    for(int i =0; i < count; i++){
-        if(modes[i].refreshRate > maxRefreshRate){
-            maxRefreshRate = modes[i].refreshRate;
-            bestWidth = modes[i].width;
-            bestHeight = modes[i].height;
-        }
-        else if(modes[i].refreshRate == maxRefreshRate){
-            if(modes[i].width > bestWidth){
-                bestWidth = modes[i].width;
-                bestHeight = modes[i].height;
-            }
-        }
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
+        this->game->currentState = this->game->lastState;
     }
 
-    std::cout << "Monitor forçado para NATIVO para garantir Hz: " 
-              << bestWidth << "x" << bestHeight 
-              << " @ " << maxRefreshRate << "Hz" << std::endl;
-
-    glfwSetWindowMonitor(window, monitor, 0, 0, 
-                        bestWidth, bestHeight, 
-                        maxRefreshRate);
-    glViewport(0, 0, bestWidth, bestHeight);
-    glfwSwapInterval(1);
-    
-    configUI::saveSettings();
-    return 1;
+    if(key == GLFW_KEY_ENTER && action == GLFW_PRESS){
+        this->game->applySettingChanges(this->sensitivity, this->currentResolutionIndex);
+    }
 }
 
-stateApp StateSettings::processInput(stateApp lastState)
+
+void StateSettings::processInput()
 {
-    bool escPressed = glfwGetKey(this->window, GLFW_KEY_ESCAPE) == GLFW_PRESS;
-    if(escPressed && !escPressedLastFrame){
-        escPressedLastFrame = escPressed;
-        return lastState;
-    }
-    escPressedLastFrame = escPressed;
+    // bool escPressed = glfwGetKey(this->game->getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS;
+    // if(escPressed && !escPressedLastFrame){
+    //     escPressedLastFrame = escPressed;
+    //     this->game->currentState = this->game->lastState;
+    // }
+    // escPressedLastFrame = escPressed;
 
-    bool enterPressed = glfwGetKey(this->window, GLFW_KEY_ENTER) == GLFW_PRESS;
-    if(enterPressed && !enterPressedLastFrame){
-        enterPressedLastFrame = true;
-        applySettingsChanges();
-        return stateApp::SETTINGS;
-    }
-    enterPressedLastFrame = enterPressed;
-
-    return stateApp::SETTINGS;
+    // bool enterPressed = glfwGetKey(this->game->getWindow(), GLFW_KEY_ENTER) == GLFW_PRESS;
+    // if(enterPressed && !enterPressedLastFrame){
+    //     enterPressedLastFrame = true;
+    //     this->game->applySettingChanges(this->sensitivity, this->currentResolutionIndex);
+    // }
+    // enterPressedLastFrame = enterPressed;
 }

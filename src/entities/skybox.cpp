@@ -1,4 +1,4 @@
-#include "core/skyBox.hpp"
+#include "entities/skyBox.hpp"
 
 SkyBox::SkyBox(const std::string& texturePath) : shader("assets/shaders/skyBox.vs", "assets/shaders/skyBox.fs")
 {

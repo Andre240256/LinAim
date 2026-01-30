@@ -10,19 +10,23 @@
 #include "imgui_impl_opengl3.h"
 
 #include "core/configUI.hpp"
+#include "core/game.hpp"
 #include "stateDefinitions.hpp"
 
 class StateStartMenu{
 public:
-    StateStartMenu(GLFWwindow * window);
+    Game * game;
 
-    stateApp run();
+    StateStartMenu(Game * game);
+    void run();
+    void processKeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods);
+
 private:
-    GLFWwindow * window;
     bool escPressedLastFrame;
 
     ImVec2 buttonNormalSize;
     ImVec2 buttonBigSize;
 
-    stateApp processInput();
+    void processInput();
+    void drawButtons();
 };

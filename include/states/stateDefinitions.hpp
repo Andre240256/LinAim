@@ -3,7 +3,7 @@
 enum class stateApp {
     START_MENU,
     MENU,
-    GAME,
+    FPS,
     SETTINGS,
     EXIT
 };

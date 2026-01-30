@@ -1,5 +1,7 @@
 #include "core/shader.hpp"
 
+unsigned int Shader::currentProgramID = 0;
+
 //constructor
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
 {

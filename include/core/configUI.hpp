@@ -1,11 +1,4 @@
 #pragma once
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <fstream>
-#include <filesystem>
-#include <iostream>
-#include <iomanip>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -32,18 +25,14 @@ struct SettingData {
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SettingData, sensitivity, strechedRes, currentResolution);
 
-class configUI{
-public:
-    static SettingData data;
-    static ImFont * MainFont;
-    static ImGuiWindowFlags windowFlags;
-    static std::vector<Resolution> availableResolutions;
-    static int currentResolutionIndex;
-    static GLFWwindow * window;
-
-    static void setup();
-    static void saveSettings();
-    static void loadResolutions();
-    static void loadSettings();
-private:
+struct ConfigUI {
+    ImFont * mainFont = nullptr;
+    ImGuiWindowFlags windowFlagsDefault = (
+        ImGuiWindowFlags_NoDecoration |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoSavedSettings |
+        ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus
+    );
 };

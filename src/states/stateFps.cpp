@@ -2,22 +2,18 @@
 
 //constructor
 GridSlot::GridSlot(glm::vec3 pos, bool occupied) :
-pos(pos), occupied(occupied)
-{}
+pos(pos), occupied(occupied) {}
 
 //Constructor
 StateFps::StateFps(Game * ptrMaster) :
-skybox("assets/textures/skyCubeMap/"), game(ptrMaster), player(glm::vec3(0.0f, 3.0f, 10.0f))
+ State(ptrMaster), skybox("assets/textures/skyCubeMap/"), player(glm::vec3(0.0f, 3.0f, 10.0f))
 {
     Ball::initShader();
     Grid::initShader();
-    
-    this->player.setSensitility(this->game->getSettings().sensitivity);
-    this->escPressedLastFrame = false;
-
-    loadMatricesUBO(0);
-    setBallgrid();
-    setBallsVector(); 
+    this->loadMatricesUBO(0);
+    this->init();
+    this->setBallgrid();
+    this->setBallsVector(); 
 }
 
 StateFps::~StateFps()
@@ -31,96 +27,121 @@ StateFps::~StateFps()
     balls.clear();
 }
 
-//Public Functions
-void StateFps::run() 
+void StateFps::init()
 {
     glfwSetInputMode(this->game->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    this->player.setSensitivity(this->game->getSettings().sensitivity);
 
-    glm::mat4 view;
-    glm::mat4 projection;
+    Resolution currentResolution = this->game->getSettings().currentResolution;
+    this->width = currentResolution.width;
+    this->height = currentResolution.height;
 
-    int width = this->game->getSettings().currentResolution.width;
-    int height = this->game->getSettings().currentResolution.height;
-    float aspect;
-    aspect = static_cast<float>(width) / static_cast<float>(height);
-    float vFovRad = 2.0f * std::atan(std::tan(glm::radians(player.fov) / 2.0f) / aspect);
-    projection = glm::perspective(vFovRad, aspect, 0.1f, 100.0f);
+    this->aspect = static_cast<float>(width) / static_cast<float> (height);
+    this->hFov = 2.0f * std::atan(std::tan(glm::radians(this->player.fov)/ 2.0f) / this->aspect);
+    this->projection = glm::perspective(hFov, aspect, 0.1f, 100.0f);
 
-
-    this->player.setSensibility(this->game->getSettings().sensitivity);
     this->player.lastX = static_cast<float>(width) / 2.0f;
     this->player.lastY = static_cast<float>(height) / 2.0f;
     this->player.firstMouse = true;
 
-    this->deltaTime = 0.0f;
-    this->lastFrame = 0.0f;
-
-    while(!glfwWindowShouldClose(this->game->getWindow()) && this->game->currentState == stateApp::FPS)
-    {
-        deltaTimeCalc();
-        
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        processInput();
-
-        view = player.getViewMat();
-
-        glBindBuffer(GL_UNIFORM_BUFFER, this->uboMatrices);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view));
-        glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projection));
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-        for(auto it = bullets.begin(); it != bullets.end();){
-            Bullet * bullet = *it;
-            if(bullet->active)
-                bullet->draw(), it++;
-            else{    
-                delete *it;
-                it = bullets.erase(it);
-            }
-        }
-
-        for(Ball * ball : balls){
-            if(ball->active)
-                ball->draw();
-            else{
-                freeGridSlot(ball->currentSlot);
-                int randomIndex = getRandomFreeSlot();
-                ball->active = true;
-                ball->currentSlot = randomIndex;
-                ball->pos = this->ballGrid[randomIndex].pos;
-                this->ballGrid[randomIndex].occupied = true;
-                this->playerStats.targetsHit++;
-                std::cout << "Total Targets hit: " << this->playerStats.targetsHit << std::endl;
-            }
-        }
-
-        for(auto it = bullets.begin(); it != bullets.end(); it++){
-            Bullet * bullet = *it;
-            glm::vec3 oldPos = bullet->updatePos(this->game->getWindow(), deltaTime);
-
-            if(!(bullet->active)){
-                continue;
-            }
-
-            for(auto itr = balls.begin(); itr != balls.end(); itr++){
-                Ball * ball = *itr;
-                bullet->checkCollision(bullet->pos, oldPos, *ball);
-            }
-        }  
-
-        grid.drawCell();
-        skybox.draw();
-        crosshair.draw(static_cast<float>(width), static_cast<float>(height));
-
-        glfwSwapBuffers(this->game->getWindow());
-        glfwPollEvents();
-    }
-
-    glfwSetInputMode(this->game->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glBindBuffer(GL_UNIFORM_BUFFER, this->uboMatrices);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), glm::value_ptr(projection));
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
+void StateFps::processInput() {}
+
+void StateFps::update(float dt)
+{
+    this->player.updatePos(this->game->getWindow(), dt);
+
+    for(auto it = this->bullets.begin(); it != this->bullets.begin();){
+        Bullet * bullet = *it;
+        if(bullet->active) it++;
+        else{
+            delete *it;
+            it = this->bullets.erase(it);
+        }
+    }
+
+    for(Ball * ball : this->balls){
+        if(!ball->active){
+            int randomIndex = getRandomFreeSlot();
+            freeGridSlot(ball->currentSlot);
+            ball->active = true;
+            ball->currentSlot = randomIndex;
+            ball->pos = this->ballGrid[randomIndex].pos;
+            this->ballGrid[randomIndex].occupied = true;
+            this->playerStats.targetsHit++;
+            std::cout << "Total Targets hit: " << this->playerStats.targetsHit << std::endl;
+        }
+    }
+
+    for(auto it = this->bullets.begin(); it != bullets.end(); it++){
+        Bullet * bullet = *it;
+        glm::vec3 oldPos = bullet->updatePos(this->game->getWindow(), dt);
+
+        if(!bullet->active) continue;
+
+        for(auto itr = this->balls.begin(); itr != this->balls.end(); itr++){
+            Ball * ball = *itr;
+            bullet->checkCollision(bullet->pos, oldPos, *ball);
+        }
+    }
+}
+
+void StateFps::render()
+{
+    this->view = this->player.getViewMat();
+
+    glBindBuffer(GL_UNIFORM_BUFFER, this->uboMatrices);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view));    
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    for(Bullet * bullet : this->bullets){
+        if(bullet->active)
+            bullet->draw();
+    }
+
+    for(Ball * ball : this->balls){
+        if(ball->active)
+            ball->draw();
+    }
+
+    grid.drawCell();
+    skybox.draw();
+    crosshair.draw(this->width, this->height);
+}
+
+stateApp StateFps::getType()
+{
+    return stateApp::FPS;
+}
+
+void StateFps::mouseCallback(GLFWwindow * window, double x, double y)
+{
+    this->player.updateDir(window, x, y);
+}
+
+void StateFps::mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
+{
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
+        glm::vec3 startPos = this->player.Pos + this->player.Front * 0.1f;
+        this->bullets.push_back(new Bullet(startPos, this->player.Front));
+    }
+}
+
+void StateFps::keyCallback(GLFWwindow * window, int key, int sancode, int action, int mods)
+{
+    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
+        this->game->requestChangeState(stateApp::SETTINGS, stateAction::PUSH);
+    }
+}
+
+void StateFps::charCallback(GLFWwindow * window, unsigned int codepoint) {}
+
+//private functions
+//------------------
 void StateFps::freeGridSlot(int index)
 {
     if(index >= 0 && index < ballGrid.size()){
@@ -136,26 +157,6 @@ void StateFps::shoot()
     fflush(stdout);
 }
 
-void StateFps::processKeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods)
-{
-    if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
-        this->game->currentState = stateApp::SETTINGS;
-    }
-}
-
-//Private Functions
-
-void StateFps::deltaTimeCalc()
-{
-    float currentFrame = glfwGetTime();
-    this->deltaTime = currentFrame - this->lastFrame;
-    this->lastFrame = currentFrame;
-}
-
-void StateFps::processInput()
-{
-    player.updatePos(this->game->getWindow(), this->deltaTime);
-}
 
 void StateFps::loadMatricesUBO(int gateway)
 {
@@ -232,34 +233,6 @@ int StateFps::getRandomFreeSlot()
 
     int randomIndex = rand() % freeIndices.size();
     return freeIndices[randomIndex];
-}
-
-//Depricated function not in use, we use *getRandomFreeSlot* 
-//and then get the position of that random slot in the grid.
-glm::vec3 StateFps::getRandomBallPosition() const
-{
-    bool validPos = false;
-    int i = 0;
-    glm::vec3 randomPos;
-    while(!validPos && i < 100)
-    {
-        validPos = false;
-        randomPos = glm::vec3 (
-            getRandomFloat(-10.0f, 10.0f),
-            3.0f + getRandomFloat(-1.0f, 3.0f),
-            -5.0f
-        );
-
-        for(auto ball : this->balls){
-            if(ball != nullptr)
-                if(length(ball->pos - randomPos) > ball->scale.x * 2)
-                    validPos = true;
-        }
-
-        i++;
-    }
-
-    return randomPos;
 }
 
 int StateFps::getRandomInt(int a, int b) const

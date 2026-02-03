@@ -22,7 +22,7 @@
 #include "entities/crosshair.hpp"
 #include "entities/grid.hpp"
 
-#include "states/stateDefinitions.hpp"
+#include "states/state.hpp"
 
 struct GridSlot{
     glm::vec3 pos;
@@ -36,10 +36,8 @@ struct PlayerGameStats{
     unsigned int targetsHit = 0;
 };
 
-class StateFps{
+class StateFps : public State{
 public:
-    Game * game;
-
     std::vector<Bullet *> bullets;
     std::vector<Ball *> balls;
 
@@ -50,21 +48,32 @@ public:
     Grid grid;
 
     StateFps(Game * ptrMaster);
-    ~StateFps();
+    ~StateFps() noexcept override;
 
-    void run();
+    void init() override;
+    void processInput() override;
+    void update(float dt) override;
+    void render() override;
+    stateApp getType() override;
+
+    void mouseCallback(GLFWwindow * window, double x, double y) override;
+    void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods) override;
+    void keyCallback(GLFWwindow * window, int key, int sancode, int action, int mods) override;
+    void charCallback(GLFWwindow * window, unsigned int codepoint) override;
+    
+private:
 
     void freeGridSlot(int index);
     void shoot();
     void processKeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods);
 
-private:
     static std::mt19937& getGenerator();
 
-    float deltaTime;
-    float lastFrame;
+    float hFov;
+    float aspect;
 
-    bool escPressedLastFrame;
+    float width;
+    float height;
 
     glm::mat4 view;
     glm::mat4 projection;
@@ -75,9 +84,6 @@ private:
     float gridSpacing;
     int gridRows;
     int gridCols; 
-
-    void deltaTimeCalc();
-    void processInput();
     
     bool setBallsVector();
     void setBallgrid();

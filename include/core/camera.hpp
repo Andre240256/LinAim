@@ -22,7 +22,7 @@ public:
     void updateDir(GLFWwindow * window, double xposIn, double yposIn);
     void updateZoom(double yoffset);
 
-    void setSensitility(float sensitivity) { this->sensitivity = sensitivity; }
+    void setSensitivity(float sensitivity) { this->sensitivity = sensitivity; }
 
     glm::mat4 getViewMat();
 

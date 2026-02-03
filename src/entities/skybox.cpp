@@ -19,7 +19,7 @@ void SkyBox::draw()
     shader.use();
 
     glBindVertexArray(this->VAO);
-    glActiveTexture(0);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, this->ID);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glDepthFunc(GL_LESS);
@@ -54,7 +54,6 @@ void SkyBox::setupCubeMap(const std::string& texturePath)
             stbi_image_free(data);
         }
         else{
-            std::cout << "ERROR LOADING CUBE MAP FILE " << completePath << std::endl;
             stbi_image_free(data);
         }
     }

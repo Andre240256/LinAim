@@ -11,22 +11,28 @@
 
 #include "core/configUI.hpp"
 #include "core/game.hpp"
-#include "stateDefinitions.hpp"
+#include "states/state.hpp"
 
-class StateStartMenu{
+class StateStartMenu : public State{
 public:
-    Game * game;
-
     StateStartMenu(Game * game);
-    void run();
-    void processKeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods);
+    ~StateStartMenu() noexcept override;
+
+    void init() override;
+    void processInput() override;
+    void update(float dt) override;
+    void render() override;
+    stateApp getType() override;
+
+    void mouseCallback(GLFWwindow * window, double x, double y) override;
+    void mouseButtonCallback(GLFWwindow * window, int button, int action, int mods) override;
+    void keyCallback(GLFWwindow * window, int key, int sancode, int action, int mods) override;
+    void charCallback(GLFWwindow * widnow, unsigned int codepoint) override;
 
 private:
-    bool escPressedLastFrame;
-
     ImVec2 buttonNormalSize;
     ImVec2 buttonBigSize;
 
-    void processInput();
     void drawButtons();
+
 };

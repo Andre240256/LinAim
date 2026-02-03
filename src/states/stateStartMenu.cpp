@@ -2,66 +2,66 @@
 
 //constructor
 //------------
-StateStartMenu::StateStartMenu(Game * ptrMaster) : game(ptrMaster)
+StateStartMenu::StateStartMenu(Game * ptrMaster) : State(ptrMaster)
 {
-    this->escPressedLastFrame = false;
     this->buttonNormalSize = {200.0f, 40.0f};
     this->buttonBigSize = {400.0f, 80.0f};
+    this->init();
 }
 
-void StateStartMenu::run()
+StateStartMenu::~StateStartMenu() noexcept {}
+
+
+void StateStartMenu::init()
 {
-    while(!glfwWindowShouldClose(this->game->getWindow()) && this->game->currentState == stateApp::START_MENU)
-    {
-        glClearColor(0.3f, 0.5f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glfwPollEvents();
-
-        processInput();
-
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-
-        const ImGuiViewport* viewport = ImGui::GetMainViewport();
-        ImGui::SetNextWindowPos(viewport->WorkPos);
-        ImGui::SetNextWindowSize(viewport->WorkSize);
-
-        if (this->game->getFont() != nullptr) ImGui::PushFont(this->game->getFont());
-        ImGui::Begin("StartMenuOverlay", nullptr, this->game->getWindowFlagsDefault());
-        
-        this->drawButtons();
-
-        ImGui::End();
-        if (this->game->getFont() != nullptr) ImGui::PopFont();
-        
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwSwapBuffers(this->game->getWindow());
-    }
-
-    if(glfwWindowShouldClose(this->game->getWindow())) this->game->currentState = stateApp::EXIT;
-
+    glfwSetInputMode(this->game->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
-void StateStartMenu::processKeyCallback(GLFWwindow * window, int key, int scancode, int action, int mods)
+
+void StateStartMenu::processInput() {}
+
+void StateStartMenu::update (float dt) {}
+
+void StateStartMenu::render()
+{
+    this->beginGameWindow("Start Menu Window");
+    this->drawButtons();
+    this->endGameWindow();
+}
+
+stateApp StateStartMenu::getType()
+{
+    return stateApp::START_MENU;
+}
+
+//callbacks functions
+void StateStartMenu::mouseCallback(GLFWwindow * window, double x, double y)
+{
+    ImGui_ImplGlfw_CursorPosCallback(window, x, y);
+}
+
+void StateStartMenu::mouseButtonCallback(GLFWwindow * window, int button, int action, int mods)
+{
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+}
+
+void StateStartMenu::keyCallback(GLFWwindow * window, int key, int scancode, int action, int mods)
 {
     if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
-        this->game->currentState = stateApp::SETTINGS;
+        game->requestChangeState(stateApp::SETTINGS, stateAction::PUSH);
+        return;
     }
+
+    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+}
+
+void StateStartMenu::charCallback(GLFWwindow * window, unsigned int codepoint)
+{
+    ImGui_ImplGlfw_CharCallback(window, codepoint);
 }
 
 //private functions
 //---------------
-void StateStartMenu::processInput()
-{
-    // bool escPressed = glfwGetKey(this->game->getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS;
-    // if(escPressed && !escPressedLastFrame){
-    //     escPressedLastFrame = escPressed;
-    //     this->game->currentState = stateApp::SETTINGS;
-    // }
-    // escPressedLastFrame = escPressed;
-}
 
 void StateStartMenu::drawButtons()
 {
@@ -73,13 +73,13 @@ void StateStartMenu::drawButtons()
 
     ImGui::SetCursorPos(ImVec2(centerPosX, centerPosY));
     if(ImGui::Button("Play Game", this->buttonBigSize)){
-        this->game->currentState = stateApp::FPS;
+        this->game->requestChangeState(stateApp::FPS, stateAction::CHANGE);
     }
 
     centerPosY += windowHeight / 6.0f;
     ImGui::SetCursorPos(ImVec2(centerPosX, centerPosY));
     if(ImGui::Button("Settings", this->buttonBigSize)){
-        this->game->currentState = stateApp::SETTINGS;
+        this->game->requestChangeState(stateApp::SETTINGS, stateAction::PUSH);
     }
 
     float yStep = windowHeight / 6.0f - this->buttonBigSize.y - this->buttonNormalSize.y * 0.5f;
@@ -88,7 +88,6 @@ void StateStartMenu::drawButtons()
     centerPosX = (windowWidth - this->buttonNormalSize.x) * 0.5f;
     ImGui::SetCursorPosX(centerPosX);
     if(ImGui::Button("quit", this->buttonNormalSize)){
-        glfwSetWindowShouldClose(this->game->getWindow(), true);
-        this->game->currentState = stateApp::EXIT;
+        this->game->requestChangeState(stateApp::EXIT, stateAction::NONE);
     }
 }

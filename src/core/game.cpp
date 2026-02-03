@@ -13,17 +13,16 @@ Game::Game()
     this->loadImGui(); 
     this->loadCallBacks();        
     this->loadResolutions();   
-    this->setup();             
+    this->setup();      
+    this->requestChangeState(stateApp::START_MENU, stateAction::PUSH); 
+    this->shouldClose = false;
+    this->pollEvents();      
 }
 
 Game::~Game()
 {
     this->shutdownImGui();
-
-    if(this->stateFps != nullptr) delete this->stateFps;
-    if(this->stateStartMenu != nullptr) delete this->stateStartMenu;
-    if(this->stateSettings != nullptr) delete this->stateSettings;
-
+    this->clearStates();
     this->availableResolutions.clear();
     
     glfwTerminate();
@@ -31,43 +30,39 @@ Game::~Game()
 
 void Game::run()
 {
-    this->currentState = stateApp::START_MENU;
-    this->lastState = stateApp::START_MENU;
+    float lastFrame = 0.0f;
+    float deltaTime = 0.0f;
 
-    this->stateFps = new StateFps(this);
+    shouldClose = false;
+    this->nextState = stateApp::NONE;
+    while(!shouldClose)
+    {
+        float currentFrame = glfwGetTime();
+        float deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
-    while(this->currentState != stateApp::EXIT)
-        switch(this->currentState){
-            case stateApp::START_MENU:
-                if(this->stateStartMenu == nullptr){
-                    this->stateStartMenu = new StateStartMenu(this);
-                }
-                this->stateStartMenu->run();
-                if(this->currentState == stateApp::SETTINGS)
-                    this->lastState = stateApp::START_MENU;
-                break;
+        glfwPollEvents();
+        this->pollEvents();
 
-            case stateApp::FPS:
-                if(this->stateFps == nullptr){
-                    this->stateFps = new StateFps(this);
-                    std::cout << "Creating new object fps state" <<std::endl;
-                }
-                this->stateFps->run();
-                if(this->currentState == stateApp::SETTINGS){
-                    this->lastState = stateApp::FPS;
-                };
-                break;
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            case stateApp::SETTINGS:
-                if(this->stateSettings == nullptr){
-                    this->stateSettings = new StateSettings(this);
-                }
-                this->stateSettings->run();
-                break;
-            
-            case stateApp::EXIT:
-                break;
+        if(this->states.empty()) continue;
+
+        State * currentState = this->states[this->states.size() - 1];
+        
+        bool useImGui = (currentState->getType() != stateApp::FPS);
+        
+        if(useImGui) {
+            this->beginImGuiFrame();
         }
+
+        currentState->update(deltaTime);
+        currentState->render();
+
+        if(useImGui) this->endImGuiFrame();
+        glfwSwapBuffers(this->window);
+    }
 }
 
 void Game::applySettingChanges(float sensitivity, int currentResolutionIndex)
@@ -77,6 +72,107 @@ void Game::applySettingChanges(float sensitivity, int currentResolutionIndex)
     this->currentResolutionIndex = currentResolutionIndex;
 
     this->saveSettings();
+}
+
+void Game::requestChangeState(stateApp nextState, stateAction nextAction)
+{
+    this->nextState = nextState;
+    this->nextAction = nextAction;
+}
+
+//private functions
+//-----------------
+void Game::beginImGuiFrame()
+{
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+}
+
+void Game::endImGuiFrame()
+{
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+State * Game::createState(stateApp nextState)
+{
+    switch (nextState)
+    {
+    case stateApp::FPS:
+        return new StateFps(this);
+    case stateApp::START_MENU:
+        return new StateStartMenu(this);
+    case stateApp::SETTINGS:
+        return new StateSettings(this);
+    default:
+        return nullptr;
+    }
+}
+
+void Game::popState()
+{
+    if(this->states.empty()){
+        std::cout << "[Game::popState] Error no state to pop" <<  std::endl;
+        return;
+    }
+
+    int len = this->states.size();
+    State * lastState = this->states[len - 1];
+    
+    this->states.pop_back();
+    if(lastState != nullptr) delete lastState;
+
+    len = this->states.size();
+    lastState = this->states[len - 1];
+
+    lastState->init();
+}
+
+void Game::pushState()
+{
+    State * newState = this->createState(this->nextState);
+    // newState->init();
+    this->states.push_back(newState);
+}
+
+void Game::changeState()
+{
+    if(!this->states.empty()){
+        int len = this->states.size();
+        State * lastState = this->states[len - 1];
+        this->states.pop_back();
+        if(lastState != nullptr) delete lastState;
+    }
+
+    State * newState = this->createState(this->nextState);
+    newState->init();
+    this->states.push_back(newState);
+}
+
+void Game::pollEvents()
+{
+    if(shouldClose || this->nextState == stateApp::EXIT){
+        glfwSetWindowShouldClose(this->window, true);
+        shouldClose = true;
+        return;
+    }
+
+    if(this->nextAction != stateAction::NONE){
+        switch(this->nextAction){
+            case stateAction::POP:
+                this->popState();
+                break;
+            case stateAction::PUSH:
+                this->pushState();
+                break;
+            case stateAction::CHANGE:
+                this->changeState();
+                break;
+        }
+        this->nextState = stateApp::NONE;
+        this->nextAction = stateAction::NONE;
+    }
 }
 
 int Game::loadOpenGL()
@@ -158,6 +254,15 @@ int Game::shutdownImGui()
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+
+    return 1;
+}
+
+int Game::clearStates()
+{
+    for(auto state : states)
+        delete state;
+    states.clear();
 
     return 1;
 }
@@ -294,6 +399,52 @@ int Game::setup()
     return 1;
 }
 
+//callbacks
+//----------
+void Game::framebuffer_size_callback(GLFWwindow * window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
+void Game::mouse_callback(GLFWwindow * window, double xpos, double ypos)
+{
+    if(states.empty()) return;
+
+    int len = this->states.size();
+    State * currentState = this->states[len - 1];
+
+    currentState->mouseCallback(window, xpos, ypos);
+}
+
+void Game::mouse_button_callback(GLFWwindow * window, int button, int action, int mods)
+{
+    if(states.empty()) return;
+
+    int len = this->states.size();
+    State * currentState = this->states[len - 1];
+
+    currentState->mouseButtonCallback(window, button, action, mods);
+}
+
+void Game::key_callback(GLFWwindow * window, int key, int scancode, int action, int mods)
+{
+    if(states.empty()) return;
+
+    int len = this->states.size();
+    State * currentState = this->states[len - 1];
+
+    currentState->keyCallback(window, key, scancode, action, mods);
+}
+
+void Game::char_callback(GLFWwindow * window, unsigned int codepoint)
+{
+    if(states.empty()) return;
+
+    int len = this->states.size();
+    State * currentState = this->states[len - 1];
+
+    currentState->charCallback(window, codepoint);
+}
 
 //callbacks wrappers
 //---------------
@@ -350,64 +501,4 @@ void Game::char_callback_wrapper(GLFWwindow * window, unsigned int codepoint)
     }
 
     game->char_callback(window, codepoint);
-}
-
-//callbacks
-//-------------
-void Game::framebuffer_size_callback(GLFWwindow * window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
-void Game::mouse_callback(GLFWwindow * window, double xposIn, double yposIn)
-{
-    if(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL){
-        ImGui_ImplGlfw_CursorPosCallback(window, xposIn, yposIn);
-        return;
-    }
-    else if(this->stateFps != nullptr){
-        this->stateFps->player.updateDir(window, xposIn, yposIn);
-    }
-}
-
-void Game::mouse_button_callback(GLFWwindow * window, int button, int actions, int mods)
-{
-    if(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL){
-        ImGui_ImplGlfw_MouseButtonCallback(window, button, actions, mods);
-        ImGuiIO& io = ImGui::GetIO();
-        if (io.WantCaptureMouse) {
-            return;
-        }
-    }
-
-    if(button == GLFW_MOUSE_BUTTON_LEFT && actions == GLFW_PRESS && stateFps != nullptr){
-        this->stateFps->shoot();
-    }
-}
-
-void Game::key_callback(GLFWwindow * window, int key, int scancode, int action, int mods)
-{
-
-    if(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL){
-        ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
-    }
-
-    switch(this->currentState){
-        case stateApp::FPS:
-            if(this->stateFps != nullptr) this->stateFps->processKeyCallback(window, key, scancode, action, mods);
-            break;
-        case stateApp::SETTINGS:
-            if(this->stateSettings != nullptr) this->stateSettings->processKeyCallback(window, key, scancode, action, mods);
-            break;
-        case stateApp::START_MENU:
-            if(this->stateStartMenu != nullptr) this->stateStartMenu->processKeyCallback(window, key, scancode, action, mods);
-            break;
-    }
-}
-
-void Game::char_callback(GLFWwindow * window, unsigned int codepoint)
-{
-    if(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL){
-        ImGui_ImplGlfw_CharCallback(window, codepoint);
-    }
 }

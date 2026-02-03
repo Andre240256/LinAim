@@ -38,8 +38,8 @@ struct PlayerGameStats{
 
 class StateFps : public State{
 public:
-    std::vector<Bullet *> bullets;
-    std::vector<Ball *> balls;
+    std::vector<std::unique_ptr<Bullet>> bullets;
+    std::vector<std::unique_ptr<Ball>> balls;
 
     Player player;
     PlayerGameStats playerStats;

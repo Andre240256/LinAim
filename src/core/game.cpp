@@ -49,7 +49,7 @@ void Game::run()
 
         if(this->states.empty()) continue;
 
-        State * currentState = this->states[this->states.size() - 1];
+        State * currentState = this->states[this->states.size() - 1].get();
         
         bool useImGui = (currentState->getType() != stateApp::FPS);
         
@@ -95,18 +95,18 @@ void Game::endImGuiFrame()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-State * Game::createState(stateApp nextState)
+std::unique_ptr<State> Game::createState(stateApp nextState)
 {
     switch (nextState)
     {
-    case stateApp::FPS:
-        return new StateFps(this);
-    case stateApp::START_MENU:
-        return new StateStartMenu(this);
-    case stateApp::SETTINGS:
-        return new StateSettings(this);
-    default:
-        return nullptr;
+        case stateApp::FPS:
+            return std::make_unique<StateFps>(this);
+        case stateApp::START_MENU:
+            return std::make_unique<StateStartMenu>(this);
+        case stateApp::SETTINGS:
+            return std::make_unique<StateSettings>(this);
+        default:
+            return nullptr;
     }
 }
 
@@ -116,38 +116,36 @@ void Game::popState()
         std::cout << "[Game::popState] Error no state to pop" <<  std::endl;
         return;
     }
-
-    int len = this->states.size();
-    State * lastState = this->states[len - 1];
-    
     this->states.pop_back();
-    if(lastState != nullptr) delete lastState;
 
-    len = this->states.size();
-    lastState = this->states[len - 1];
-
-    lastState->init();
+    if(!this->states.empty()){
+        this->states.back()->init();
+    }
+    else {
+        std::cout << "[Game::popState] Error no state to active" << std::endl;
+    }
 }
 
 void Game::pushState()
 {
-    State * newState = this->createState(this->nextState);
-    // newState->init();
-    this->states.push_back(newState);
+    auto newState = this->createState(this->nextState);
+    if(newState){
+        newState->init();
+        this->states.push_back(std::move(newState));
+    }
 }
 
 void Game::changeState()
 {
     if(!this->states.empty()){
-        int len = this->states.size();
-        State * lastState = this->states[len - 1];
-        this->states.pop_back();
-        if(lastState != nullptr) delete lastState;
+        this->states.pop_back(); 
     }
 
-    State * newState = this->createState(this->nextState);
-    newState->init();
-    this->states.push_back(newState);
+    auto newState = this->createState(this->nextState);
+    if(newState){
+        newState->init();
+        this->states.push_back(std::move(newState));
+    }
 }
 
 void Game::pollEvents()
@@ -260,8 +258,6 @@ int Game::shutdownImGui()
 
 int Game::clearStates()
 {
-    for(auto state : states)
-        delete state;
     states.clear();
 
     return 1;
@@ -409,41 +405,25 @@ void Game::framebuffer_size_callback(GLFWwindow * window, int width, int height)
 void Game::mouse_callback(GLFWwindow * window, double xpos, double ypos)
 {
     if(states.empty()) return;
-
-    int len = this->states.size();
-    State * currentState = this->states[len - 1];
-
-    currentState->mouseCallback(window, xpos, ypos);
+    this->states.back()->mouseCallback(window, xpos, ypos);
 }
 
 void Game::mouse_button_callback(GLFWwindow * window, int button, int action, int mods)
 {
     if(states.empty()) return;
-
-    int len = this->states.size();
-    State * currentState = this->states[len - 1];
-
-    currentState->mouseButtonCallback(window, button, action, mods);
+    this->states.back()->mouseButtonCallback(window, button, action, mods);
 }
 
 void Game::key_callback(GLFWwindow * window, int key, int scancode, int action, int mods)
 {
     if(states.empty()) return;
-
-    int len = this->states.size();
-    State * currentState = this->states[len - 1];
-
-    currentState->keyCallback(window, key, scancode, action, mods);
+    this->states.back()->keyCallback(window, key, scancode, action, mods);
 }
 
 void Game::char_callback(GLFWwindow * window, unsigned int codepoint)
 {
     if(states.empty()) return;
-
-    int len = this->states.size();
-    State * currentState = this->states[len - 1];
-
-    currentState->charCallback(window, codepoint);
+    this->states.back()->charCallback(window, codepoint);
 }
 
 //callbacks wrappers

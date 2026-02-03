@@ -2,6 +2,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <memory>
+
 #include "core/configUI.hpp"
 #include "states/state.hpp"
 
@@ -11,7 +13,7 @@ class StateStartMenu;
 
 class Game {
 public:
-    std::vector <State *> states;
+    std::vector <std::unique_ptr<State>> states;
     stateApp nextState = stateApp::NONE;
     stateAction nextAction = stateAction::NONE;
 
@@ -44,7 +46,7 @@ private:
     void beginImGuiFrame();
     void endImGuiFrame();
 
-    State * createState(stateApp nextState);
+    std::unique_ptr<State> createState(stateApp nextState);
     void popState();
     void pushState();
     void changeState();

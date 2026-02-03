@@ -18,12 +18,7 @@ StateFps::StateFps(Game * ptrMaster) :
 
 StateFps::~StateFps()
 {
-    for(auto it = bullets.begin(); it != bullets.end(); it++)
-        delete *it;
     bullets.clear();
-    
-    for(auto it = balls.begin(); it != balls.end(); it++)
-        delete *it;
     balls.clear();
 }
 
@@ -56,15 +51,14 @@ void StateFps::update(float dt)
     this->player.updatePos(this->game->getWindow(), dt);
 
     for(auto it = this->bullets.begin(); it != this->bullets.begin();){
-        Bullet * bullet = *it;
-        if(bullet->active) it++;
+        Bullet& bullet = **it;
+        if(bullet.active) it++;
         else{
-            delete *it;
             it = this->bullets.erase(it);
         }
     }
 
-    for(Ball * ball : this->balls){
+    for(auto& ball : this->balls){
         if(!ball->active){
             int randomIndex = getRandomFreeSlot();
             freeGridSlot(ball->currentSlot);
@@ -78,14 +72,14 @@ void StateFps::update(float dt)
     }
 
     for(auto it = this->bullets.begin(); it != bullets.end(); it++){
-        Bullet * bullet = *it;
-        glm::vec3 oldPos = bullet->updatePos(this->game->getWindow(), dt);
+        Bullet& bullet = **it;
+        glm::vec3 oldPos = bullet.updatePos(this->game->getWindow(), dt);
 
-        if(!bullet->active) continue;
+        if(!bullet.active) continue;
 
         for(auto itr = this->balls.begin(); itr != this->balls.end(); itr++){
-            Ball * ball = *itr;
-            bullet->checkCollision(bullet->pos, oldPos, *ball);
+            Ball& ball = **itr;
+            bullet.checkCollision(bullet.pos, oldPos, ball);
         }
     }
 }
@@ -98,12 +92,12 @@ void StateFps::render()
     glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), glm::value_ptr(view));    
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    for(Bullet * bullet : this->bullets){
+    for(auto& bullet : this->bullets){
         if(bullet->active)
             bullet->draw();
     }
 
-    for(Ball * ball : this->balls){
+    for(auto& ball : this->balls){
         if(ball->active)
             ball->draw();
     }
@@ -127,7 +121,7 @@ void StateFps::mouseButtonCallback(GLFWwindow * window, int button, int action, 
 {
     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
         glm::vec3 startPos = this->player.Pos + this->player.Front * 0.1f;
-        this->bullets.push_back(new Bullet(startPos, this->player.Front));
+        this->shoot();
     }
 }
 
@@ -151,7 +145,8 @@ void StateFps::freeGridSlot(int index)
 
 void StateFps::shoot()
 {
-    bullets.push_back(new Bullet(this->player.Pos + this->player.Front * 1.0f, this->player.Front));
+    glm::vec3 startPos = this->player.Pos + this->player.Front * 0.1f;
+    bullets.push_back(std::make_unique<Bullet>(startPos, this->player.Front));
     this->playerStats.totalShots++;
     std::cout << "Total shots: " << this->playerStats.totalShots << std::endl;
     fflush(stdout);
@@ -203,10 +198,10 @@ bool StateFps::setBallsVector()
         int randomIndex = getRandomFreeSlot();
         if(randomIndex == -1) return false;
 
-        Ball * ball = new Ball(this->ballGrid[randomIndex].pos, randomIndex);
+        auto ball = std::make_unique<Ball>(this->ballGrid[randomIndex].pos, randomIndex);
         if(ball == nullptr) return false;
+        this->balls.push_back(std::move(ball));
         ballGrid[randomIndex].occupied = true;
-        this->balls.push_back(ball);
     }
     return true;
 }

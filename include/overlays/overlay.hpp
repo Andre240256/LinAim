@@ -7,11 +7,7 @@
 #include "imgui_impl_opengl3.h"
 
 class Game;
-
-enum class overlayType {
-    FPS,
-    PLAYER_STATS,
-};
+enum class overlayType;
 
 class Overlay{
 public:
@@ -40,8 +36,7 @@ private:
         ImGuiWindowFlags_NoResize           | 
         ImGuiWindowFlags_NoSavedSettings    | 
         ImGuiWindowFlags_NoBackground       | 
-        ImGuiWindowFlags_NoInputs           |
-        ImGuiWindowFlags_NoBringToFrontOnFocus
+        ImGuiWindowFlags_NoInputs           
     );
 
     const ImGuiWindowFlags overlayFlagsInteractive = (
@@ -49,7 +44,6 @@ private:
         ImGuiWindowFlags_NoMove             | 
         ImGuiWindowFlags_NoResize           | 
         ImGuiWindowFlags_NoSavedSettings    | 
-        ImGuiWindowFlags_NoBackground       | 
-        ImGuiWindowFlags_NoBringToFrontOnFocus
+        ImGuiWindowFlags_NoBackground       
     );
 };

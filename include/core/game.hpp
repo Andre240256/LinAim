@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include <memory>
+#include <set>
 
 #include "core/configUI.hpp"
 #include "states/state.hpp"
@@ -19,7 +20,7 @@ public:
     stateApp nextState = stateApp::NONE;
     stateAction nextAction = stateAction::NONE;
 
-    std::vector <std::unique_ptr<Overlay>> overlays;
+    std::set <std::unique_ptr<Overlay>> overlays;
 
     Game();
     ~Game();
@@ -55,7 +56,8 @@ private:
     void pushState();
     void changeState();
 
-    void loadOverlaysVector();
+    std::unique_ptr<Overlay> createOverlay(overlayType type);
+    void loadOverlaysSet();
 
     void pollEvents();
 

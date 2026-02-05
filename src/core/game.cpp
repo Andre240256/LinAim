@@ -10,7 +10,7 @@
 Game::Game()
 {
     this->loadSettings();
-    this->loadOverlaysVector();       
+    this->loadOverlaysSet();       
     this->loadOpenGL();         
     this->loadGlad();          
     this->loadImGui(); 
@@ -26,6 +26,7 @@ Game::~Game()
 {
     this->shutdownImGui();
     this->clearStates();
+    this->overlays.clear();
     this->availableResolutions.clear();
     
     glfwTerminate();
@@ -52,9 +53,8 @@ void Game::run()
 
         if(this->states.empty()) continue;
 
-        State * currentState = this->states[this->states.size() - 1].get();
+        State * currentState = this->states.back().get();
         
-        bool useImGui = (currentState->getType() != stateApp::FPS);
         
         this->beginImGuiFrame();
 
@@ -76,7 +76,7 @@ void Game::applySettingChanges(float sensitivity, int currentResolutionIndex)
     this->settings.currentResolution = this->availableResolutions[currentResolutionIndex];
     this->settings.sensitivity = sensitivity;
     this->currentResolutionIndex = currentResolutionIndex;
-    this->loadOverlaysVector();
+    this->loadOverlaysSet();
 
     this->saveSettings();
 }
@@ -155,13 +155,24 @@ void Game::changeState()
     }
 }
 
-void Game::loadOverlaysVector()
-{
-    if(this->settings.overlays.fps){
-        this->overlays.push_back(std::make_unique<OverlayFps>(this));
+std::unique_ptr<Overlay> Game::createOverlay(overlayType type){
+    switch (type)
+    {
+    case overlayType::FPS:
+        return std::make_unique<OverlayFps>(this);
+    case overlayType::PLAYER_STATS:
+        return nullptr; //not implemented
+    default:
+        return nullptr;
     }
-    if(this->settings.overlays.stats){
-        //not implemented.
+}
+
+void Game::loadOverlaysSet()
+{
+    for(auto& overlayType : this->settings.overlaysTypes){
+        if(overlayType != overlayType::INVALID){
+            this->overlays.insert(this->createOverlay(overlayType));
+        }
     }
 }
 

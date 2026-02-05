@@ -50,7 +50,7 @@ void OverlayFps::drawFpsStats()
     ImGui::SetCursorPos(ImVec2(centerX, centerY));
     std::string finalText = text + std::to_string(this->fps);
 
-    ImGui::PushStyleColor(ImGuiCol_InputTextCursor, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
     ImGui::Text("%s", finalText.c_str());
     ImGui::PopStyleColor();
 }   

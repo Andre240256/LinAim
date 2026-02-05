@@ -1,4 +1,5 @@
 #pragma once
+#include <set>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
@@ -9,6 +10,18 @@
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
+enum class overlayType {
+    FPS,
+    PLAYER_STATS,
+    INVALID,
+};
+
+NLOHMANN_JSON_SERIALIZE_ENUM(overlayType, {
+    {overlayType::INVALID, nullptr},
+    {overlayType::FPS, "fps"},
+    {overlayType::PLAYER_STATS, "player_stats"}
+})
+
 struct Resolution {
     int width = 1920;
     int height = 1080;
@@ -17,21 +30,13 @@ struct Resolution {
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Resolution, width, height, label)
 
-struct OverlaysConfig{
-    bool fps = true;
-    bool stats = false;
-};
-
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(OverlaysConfig, fps, stats);
-
-
 struct SettingData {
     float sensitivity = 1.0f;
     Resolution currentResolution;
-    OverlaysConfig overlays;
+    std::set <overlayType> overlaysTypes = {};
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SettingData, sensitivity, currentResolution, overlays);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SettingData, sensitivity, currentResolution, overlaysTypes);
 
 struct ConfigUI {
     ImFont * mainFont = nullptr;

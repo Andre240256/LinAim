@@ -4,10 +4,13 @@
 #include "states/stateSettings.hpp"
 #include "states/stateStartMenu.hpp"
 
+#include "overlays/overlayFps.hpp"
+
 //constructor
 Game::Game()
 {
-    this->loadSettings();       
+    this->loadSettings();
+    this->loadOverlaysVector();       
     this->loadOpenGL();         
     this->loadGlad();          
     this->loadImGui(); 
@@ -53,14 +56,17 @@ void Game::run()
         
         bool useImGui = (currentState->getType() != stateApp::FPS);
         
-        if(useImGui) {
-            this->beginImGuiFrame();
-        }
+        this->beginImGuiFrame();
 
         currentState->update(deltaTime);
         currentState->render();
 
-        if(useImGui) this->endImGuiFrame();
+        for(auto& overlay : this->overlays){
+            overlay->update(deltaTime);
+            overlay->render();
+        }
+
+        this->endImGuiFrame();
         glfwSwapBuffers(this->window);
     }
 }
@@ -70,6 +76,7 @@ void Game::applySettingChanges(float sensitivity, int currentResolutionIndex)
     this->settings.currentResolution = this->availableResolutions[currentResolutionIndex];
     this->settings.sensitivity = sensitivity;
     this->currentResolutionIndex = currentResolutionIndex;
+    this->loadOverlaysVector();
 
     this->saveSettings();
 }
@@ -145,6 +152,16 @@ void Game::changeState()
     if(newState){
         newState->init();
         this->states.push_back(std::move(newState));
+    }
+}
+
+void Game::loadOverlaysVector()
+{
+    if(this->settings.overlays.fps){
+        this->overlays.push_back(std::make_unique<OverlayFps>(this));
+    }
+    if(this->settings.overlays.stats){
+        //not implemented.
     }
 }
 

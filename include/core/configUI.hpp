@@ -17,13 +17,21 @@ struct Resolution {
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(Resolution, width, height, label)
 
-struct SettingData {
-    float sensitivity = 1.0f;
-    bool strechedRes = false;
-    Resolution currentResolution;
+struct OverlaysConfig{
+    bool fps = true;
+    bool stats = false;
 };
 
-NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SettingData, sensitivity, strechedRes, currentResolution);
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(OverlaysConfig, fps, stats);
+
+
+struct SettingData {
+    float sensitivity = 1.0f;
+    Resolution currentResolution;
+    OverlaysConfig overlays;
+};
+
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE_WITH_DEFAULT(SettingData, sensitivity, currentResolution, overlays);
 
 struct ConfigUI {
     ImFont * mainFont = nullptr;

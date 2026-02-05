@@ -6,6 +6,8 @@
 
 #include "core/configUI.hpp"
 #include "states/state.hpp"
+#include "overlays/overlay.hpp"
+
 
 class StateFps;
 class StateSettings;
@@ -16,6 +18,8 @@ public:
     std::vector <std::unique_ptr<State>> states;
     stateApp nextState = stateApp::NONE;
     stateAction nextAction = stateAction::NONE;
+
+    std::vector <std::unique_ptr<Overlay>> overlays;
 
     Game();
     ~Game();
@@ -50,6 +54,8 @@ private:
     void popState();
     void pushState();
     void changeState();
+
+    void loadOverlaysVector();
 
     void pollEvents();
 

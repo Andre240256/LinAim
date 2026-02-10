@@ -14,6 +14,11 @@ class StateFps;
 class StateSettings;
 class StateStartMenu;
 
+struct PlayerScore {
+    unsigned int targetHit = 0;
+    unsigned int shoots = 0;
+};
+
 class Game {
 public:
     std::vector <std::unique_ptr<State>> states;
@@ -28,8 +33,11 @@ public:
     void run();
     void applySettingChanges(float sensitivity, int currentResolutionIndex);
     void requestChangeState(stateApp nextState, stateAction action);
+    void updatePlayerScore(unsigned int targetHit, unsigned int shoots);
+    void resetPlayerScore();
 
     //getters
+    PlayerScore * getPlayerScore() const { return this->playerScore.get(); }
     SettingData& getSettings() { return this->settings; };
     SettingData getSettingsCopy() const { return this->settings; };
     GLFWwindow * getWindow() const { return this->window; };
@@ -40,6 +48,7 @@ public:
 
 private:
 
+    std::unique_ptr<PlayerScore> playerScore;
     bool shouldClose;
     SettingData settings;
     ConfigUI configUI;

@@ -5,12 +5,14 @@
 #include "states/stateStartMenu.hpp"
 
 #include "overlays/overlayFps.hpp"
+#include "overlays/overlayPlayerScore.hpp"
 
 //constructor
 Game::Game()
 {
     this->loadSettings();
-    this->loadOverlaysSet();       
+    this->loadOverlaysSet();
+    this->resetPlayerScore();       
     this->loadOpenGL();         
     this->loadGlad();          
     this->loadImGui(); 
@@ -87,6 +89,21 @@ void Game::requestChangeState(stateApp nextState, stateAction nextAction)
     this->nextAction = nextAction;
 }
 
+void Game::updatePlayerScore(unsigned int targetHit,unsigned int shoots)
+{
+    if(targetHit != -1)
+        this->playerScore->targetHit = targetHit;
+    if(shoots != -1)
+        this->playerScore->shoots = shoots;
+}
+
+void Game::resetPlayerScore()
+{
+    this->playerScore = std::make_unique<PlayerScore>();
+    playerScore->shoots = 0;
+    playerScore->targetHit = 0;
+}
+
 //private functions
 //-----------------
 void Game::beginImGuiFrame()
@@ -160,8 +177,8 @@ std::unique_ptr<Overlay> Game::createOverlay(overlayType type){
     {
     case overlayType::FPS:
         return std::make_unique<OverlayFps>(this);
-    case overlayType::PLAYER_STATS:
-        return nullptr; //not implemented
+    case overlayType::PLAYER_SCORE:
+        return std::make_unique<OverlayPlayerScore>(this);
     default:
         return nullptr;
     }

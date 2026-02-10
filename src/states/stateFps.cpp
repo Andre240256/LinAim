@@ -66,7 +66,7 @@ void StateFps::update(float dt)
             ball->currentSlot = randomIndex;
             ball->pos = this->ballGrid[randomIndex].pos;
             this->ballGrid[randomIndex].occupied = true;
-            this->playerStats.targetsHit++;
+            this->game->updatePlayerScore(++this->playerStats.targetsHit, -1);
             std::cout << "Total Targets hit: " << this->playerStats.targetsHit << std::endl;
         }
     }
@@ -147,11 +147,10 @@ void StateFps::shoot()
 {
     glm::vec3 startPos = this->player.Pos + this->player.Front * 0.1f;
     bullets.push_back(std::make_unique<Bullet>(startPos, this->player.Front));
-    this->playerStats.totalShots++;
+    this->game->updatePlayerScore(-1, ++this->playerStats.totalShots);
     std::cout << "Total shots: " << this->playerStats.totalShots << std::endl;
     fflush(stdout);
 }
-
 
 void StateFps::loadMatricesUBO(int gateway)
 {

@@ -2,6 +2,7 @@
 
 OverlayFps::OverlayFps(Game * ptrMaster) : Overlay(ptrMaster) {
     this->init();
+    this->game->resetPlayerScore();
 }
 
 OverlayFps::~OverlayFps() {}

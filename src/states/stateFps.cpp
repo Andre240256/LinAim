@@ -6,10 +6,12 @@ pos(pos), occupied(occupied) {}
 
 //Constructor
 StateFps::StateFps(Game * ptrMaster) :
- State(ptrMaster), skybox("assets/textures/skyCubeMap/"), player(glm::vec3(0.0f, 3.0f, 10.0f))
+    State(ptrMaster), skybox("assets/textures/skyCubeMap/"), player(glm::vec3(0.0f, 3.0f, 10.0f)),
+    revolver("assets/models/Gun _obj/Gun.obj")
 {
     Ball::initShader();
     Grid::initShader();
+    Revolver::initShader();
     this->loadMatricesUBO(0);
     this->init();
     this->setBallgrid();
@@ -49,6 +51,13 @@ void StateFps::processInput() {}
 void StateFps::update(float dt)
 {
     this->player.updatePos(this->game->getWindow(), dt);
+
+    this->revolver.rotation.y = this->player.yaw - 180;
+    this->revolver.rotation.x = this->player.pitch;
+
+    glm::vec3 playerRight = glm::cross(this->player.Front,this->player.Up);
+    glm::vec3 displacement = this->player.Front * 1.0f + this->player.Up * -0.5f + playerRight * 1.0f;
+    this->revolver.pos = this->player.Pos + displacement;
 
     for(auto it = this->bullets.begin(); it != this->bullets.begin();){
         Bullet& bullet = **it;
@@ -104,6 +113,7 @@ void StateFps::render()
 
     grid.drawCell();
     skybox.draw();
+    revolver.draw();
     crosshair.draw(this->width, this->height);
 }
 

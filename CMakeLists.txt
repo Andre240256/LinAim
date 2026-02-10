@@ -10,6 +10,7 @@ set(JSON_DIR "vendor/json")
 
 find_package(glfw3 3.3 REQUIRED)
 find_package(glm REQUIRED)
+find_package(assimp REQUIRED)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/vendor)
@@ -35,6 +36,7 @@ add_executable(LinAim ${SOURCES} ${HEADERS})
 target_link_libraries(LinAim
     glfw   
     ${GLM_LIBRARIES} 
+    assimp
     dl
 )
 

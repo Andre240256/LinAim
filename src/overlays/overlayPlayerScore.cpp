@@ -42,7 +42,6 @@ void OverlayPlayerScore::drawPlayerScore()
     float precision = 0.0f;
     if(this->shoots != 0)
         precision = 100 * static_cast<float>(this->targetHits) / static_cast<float>(this->shoots);
-    std::cout << precision << std::endl;
     int integer_part = (int)precision;
     float fractionary_part = precision - (float)integer_part;
     std::string text = "Targets Hit: " + std::to_string(this->targetHits) 

@@ -21,6 +21,7 @@
 #include "entities/bullet.hpp"
 #include "entities/crosshair.hpp"
 #include "entities/grid.hpp"
+#include "entities/revolver.hpp"
 
 #include "states/state.hpp"
 
@@ -46,6 +47,7 @@ public:
     SkyBox skybox;
     Crosshair crosshair;
     Grid grid;
+    Revolver revolver;
 
     StateFps(Game * ptrMaster);
     ~StateFps() noexcept override;

@@ -12,14 +12,14 @@ namespace fs = std::filesystem;
 
 enum class overlayType {
     FPS,
-    PLAYER_STATS,
+    PLAYER_SCORE,
     INVALID,
 };
 
 NLOHMANN_JSON_SERIALIZE_ENUM(overlayType, {
     {overlayType::INVALID, nullptr},
     {overlayType::FPS, "fps"},
-    {overlayType::PLAYER_STATS, "player_stats"}
+    {overlayType::PLAYER_SCORE, "player_score"}
 })
 
 struct Resolution {
